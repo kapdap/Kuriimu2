@@ -114,12 +114,18 @@ namespace plugin_mt_framework.Images
             [0x13] = ImageFormats.Dxt1(),
             [0x14] = ImageFormats.Dxt3(),
             [0x17] = ImageFormats.Dxt5(),
+            [0x18] = ImageFormats.Dxt5(),
 
             [0x19] = ImageFormats.Dxt1(),
+            [0x1E] = ImageFormats.Dxt1(),
             [0x1F] = ImageFormats.Dxt5(),
             [0x21] = ImageFormats.Dxt5(),
             [0x27] = ImageFormats.Dxt5(),
-            [0x2A] = ImageFormats.Dxt5()
+            [0x28] = ImageFormats.Rgba8888(),
+            [0x2A] = ImageFormats.Dxt5(),
+
+            // placeholder for verison=0x98 format=0x14 
+            [0xFF] = ImageFormats.Dxt1()
         };
 
         public static readonly IDictionary<int, IColorEncoding> SwitchFormats = new Dictionary<int, IColorEncoding>
@@ -180,6 +186,7 @@ namespace plugin_mt_framework.Images
                     return MtTexPlatform.Wii;
 
                 case 0x97:
+                case 0x98:
                 case 0x9a:
                 case 0x9d:
                     return MtTexPlatform.PS3;
