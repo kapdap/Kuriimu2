@@ -4,22 +4,22 @@ using System.Linq;
 using Eto.Drawing;
 using Eto.Forms;
 using Kanvas;
+using Kanvas.Extensions;
 using Kuriimu2.EtoForms.Extensions;
 using Kuriimu2.EtoForms.Support;
-using Color = System.Drawing.Color;
-using Size = System.Drawing.Size;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kuriimu2.EtoForms.Controls
 {
     class PaletteView : Drawable
     {
-        private IList<Color> _palette;
+        private IList<Rgba32> _palette;
         private int _selectedIndex = -1;
 
         public event EventHandler<ChoosingColorEventArgs> ChoosingColor;
         public event EventHandler<PaletteChangedEventArgs> PaletteChanged;
 
-        public IList<Color> Palette
+        public IList<Rgba32> Palette
         {
             get => _palette;
             set
@@ -48,7 +48,7 @@ namespace Kuriimu2.EtoForms.Controls
                 return;
 
             var dimPalette = GetPaletteDimension();
-            var paletteImg = _palette.ToBitmap(new Size(dimPalette, dimPalette)).ToEto();
+            var paletteImg = _palette.ToImage(new SixLabors.ImageSharp.Size(dimPalette, dimPalette)).ToEto();
 
             e.Graphics.ImageInterpolation = ImageInterpolation.None;
             e.Graphics.DrawImage(paletteImg, e.ClipRectangle);
@@ -118,7 +118,7 @@ namespace Kuriimu2.EtoForms.Controls
 
     class ChoosingColorEventArgs : EventArgs
     {
-        public Color Result { get; set; }
+        public Rgba32 Result { get; set; }
 
         public bool Cancel { get; set; }
     }
@@ -127,9 +127,9 @@ namespace Kuriimu2.EtoForms.Controls
     {
         public int Index { get; }
 
-        public Color NewColor { get; }
+        public Rgba32 NewColor { get; }
 
-        public PaletteChangedEventArgs(int index, Color color)
+        public PaletteChangedEventArgs(int index, Rgba32 color)
         {
             Index = index;
             NewColor = color;

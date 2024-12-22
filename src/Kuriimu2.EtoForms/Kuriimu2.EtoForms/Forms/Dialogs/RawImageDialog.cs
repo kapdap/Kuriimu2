@@ -17,7 +17,10 @@ using Kuriimu2.EtoForms.Extensions;
 using Kuriimu2.EtoForms.Forms.Models;
 using Kuriimu2.EtoForms.Resources;
 using Kuriimu2.EtoForms.Support;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using Bitmap = Eto.Drawing.Bitmap;
+using ByteOrder = Kontract.Models.IO.ByteOrder;
 
 namespace Kuriimu2.EtoForms.Forms.Dialogs
 {
@@ -142,7 +145,7 @@ namespace Kuriimu2.EtoForms.Forms.Dialogs
                 var paletteEncoding = CreateEncoding(SelectedPaletteEncodingExtension);
                 var colorEncodingInfo = (IEncodingInfo)encoding ?? indexEncoding;
 
-                var swizzle = CreateSwizzle(new SwizzlePreparationContext(colorEncodingInfo, new System.Drawing.Size(width, height)));
+                var swizzle = CreateSwizzle(new SwizzlePreparationContext(colorEncodingInfo, new SixLabors.ImageSharp.Size(width, height)));
 
                 var colorCount = swizzle == null ? width * height : swizzle.Width * swizzle.Height;
                 var dataSize = colorCount / colorEncodingInfo.ColorsPerValue * colorEncodingInfo.BitsPerValue / 8;
@@ -155,13 +158,13 @@ namespace Kuriimu2.EtoForms.Forms.Dialogs
                 if (SelectedSwizzleExtension.Name != Localize(NoSwizzleKey_))
                     imageConfiguration.RemapPixels.With(CreateSwizzle);
 
-                System.Drawing.Bitmap image;
+                Image<Rgba32> image;
                 if (encoding != null)
                 {
                     var transcoder = imageConfiguration
                         .Transcode.With(encoding)
                         .Build();
-                    image = transcoder.Decode(imgData, new System.Drawing.Size(width, height));
+                    image = transcoder.Decode(imgData, new SixLabors.ImageSharp.Size(width, height));
                 }
                 else
                 {
@@ -176,7 +179,7 @@ namespace Kuriimu2.EtoForms.Forms.Dialogs
                         .Transcode.With(indexEncoding)
                         .TranscodePalette.With(paletteEncoding)
                         .Build();
-                    image = transcoder.Decode(imgData, palData, new System.Drawing.Size(width, height));
+                    image = transcoder.Decode(imgData, palData, new SixLabors.ImageSharp.Size(width, height));
                 }
 
                 imageView.Image = image.ToEto();
@@ -598,7 +601,7 @@ namespace Kuriimu2.EtoForms.Forms.Dialogs
                     // Init point
                     var initPointText = SelectedSwizzleExtension.GetParameterValue<string>(Localize(InitPointKey_)).Replace(" ", "");
                     var initPointMatch = pointSequenceRegex.Match(initPointText);
-                    var finalInitPoint = new System.Drawing.Point(int.Parse(initPointMatch.Groups[1].Value), int.Parse(initPointMatch.Groups[2].Value));
+                    var finalInitPoint = new SixLabors.ImageSharp.Point(int.Parse(initPointMatch.Groups[1].Value), int.Parse(initPointMatch.Groups[2].Value));
 
                     // Y Transform
                     var transformText = SelectedSwizzleExtension.GetParameterValue<string>(Localize(YTransformKey_)).Replace(" ", "");
@@ -786,7 +789,7 @@ namespace Kuriimu2.EtoForms.Forms.Dialogs
             Height = (context.Size.Height + _swizzle.MacroTileHeight - 1) & -_swizzle.MacroTileHeight;
         }
 
-        public System.Drawing.Point Transform(System.Drawing.Point point) => _swizzle.Get(point.Y * Width + point.X);
+        public SixLabors.ImageSharp.Point Transform(SixLabors.ImageSharp.Point point) => _swizzle.Get(point.Y * Width + point.X);
     }
 
     class ExtensionTypeElement

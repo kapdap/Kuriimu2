@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +14,9 @@ using Kontract.Kanvas;
 using Kontract.Models.IO;
 using Kore.Factories;
 using Kore.Managers;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Kuriimu2.Cmd.Contexts
 {
@@ -119,7 +119,7 @@ namespace Kuriimu2.Cmd.Contexts
             var newFileStream = destinationFileSystem.OpenFile(fileName, FileMode.Create, FileAccess.Write);
 
             var imageStream = new MemoryStream();
-            image.GetImage(Progress).Save(imageStream, ImageFormat.Png);
+            image.GetImage(Progress).SaveAsPng(imageStream);
 
             imageStream.Position = 0;
             imageStream.CopyTo(newFileStream);
@@ -143,7 +143,7 @@ namespace Kuriimu2.Cmd.Contexts
             }
 
             var kanvasImage = _imageState.Images[imageIndex];
-            kanvasImage.SetImage((Bitmap)Image.FromFile(injectPath.FullName), Progress);
+            kanvasImage.SetImage(Image.Load<Rgba32>(injectPath.FullName), Progress);
         }
 
         private void ListImages()
@@ -182,30 +182,15 @@ namespace Kuriimu2.Cmd.Contexts
             var decodedImage = image.GetImage(Progress);
             Console.WriteLine();
 
-            var resizedImage = ResizeImage(decodedImage, newSize);
+            var resizedImage = decodedImage.Clone();
+            resizedImage.Mutate(i => i.Resize(newSize));
 
             var asciiImage = ConvertAscii(resizedImage);
             Console.WriteLine(asciiImage);
         }
 
-        private Bitmap ResizeImage(Image img, Size newSize)
-        {
-            var newImg = new Bitmap(newSize.Width, newSize.Height);
-            using var g = Graphics.FromImage(newImg);
-
-            g.CompositingMode = CompositingMode.SourceCopy;
-            g.CompositingQuality = CompositingQuality.HighQuality;
-            g.InterpolationMode = InterpolationMode.NearestNeighbor;
-            g.SmoothingMode = SmoothingMode.HighQuality;
-            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-            g.DrawImage(img, new Rectangle(Point.Empty, newSize), new Rectangle(Point.Empty, img.Size), GraphicsUnit.Pixel);
-
-            return newImg;
-        }
-
         // https://www.c-sharpcorner.com/article/generating-ascii-art-from-an-image-using-C-Sharp/
-        private string ConvertAscii(Bitmap image)
+        private string ConvertAscii(Image<Rgba32> image)
         {
             var asciiChars = new[] { '#', '#', '@', '%', '=', '+', '*', ':', '-', '.', ' ' };
             var sb = new StringBuilder(image.Width * image.Height);

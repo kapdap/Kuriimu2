@@ -1,7 +1,7 @@
-﻿using System.Drawing;
-using Kanvas.Swizzle.Models;
+﻿using Kanvas.Swizzle.Models;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
+using SixLabors.ImageSharp;
 
 namespace Kanvas.Swizzle
 {

@@ -12,6 +12,7 @@ using Kontract.Interfaces.Plugins.State;
 using Kontract.Models.IO;
 using Kore.Managers.Plugins;
 using Serilog;
+using SixLabors.ImageSharp;
 
 namespace Kore.Batch
 {
@@ -118,7 +119,7 @@ namespace Kore.Batch
             foreach (var img in imageState.Images)
             {
                 var fileStream = destinationFileSystem.OpenFile(filePath / (img.Name ?? $"{index:00}") + ".png", FileMode.Create, FileAccess.Write);
-                img.GetImage().Save(fileStream, ImageFormat.Png);
+                img.GetImage().SaveAsPng(fileStream);
 
                 fileStream.Close();
 

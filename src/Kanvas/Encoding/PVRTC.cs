@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using Kanvas.Native;
 using Kanvas.Swizzle;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Encoding
 {
@@ -39,7 +40,7 @@ namespace Kanvas.Encoding
         }
 
         /// <inheritdoc cref="Load"/>
-        public IEnumerable<Color> Load(byte[] tex, EncodingLoadContext loadContext)
+        public IEnumerable<Rgba32> Load(byte[] tex, EncodingLoadContext loadContext)
         {
             // Initialize PVR Texture
             var pvrTexture = PvrTexture.Create(tex, (uint)loadContext.Size.Width, (uint)loadContext.Size.Height, 1, (PixelFormat)_format, ChannelType.UnsignedByte, ColorSpace.Linear);
@@ -61,12 +62,12 @@ namespace Kanvas.Encoding
                     var sourcePoint = swizzle.Get(y * paddedWidth + x);
                     var textureIndex = (sourcePoint.Y * paddedWidth + sourcePoint.X) * 4;
 
-                    yield return Color.FromArgb(textureData[textureIndex + 3], textureData[textureIndex], textureData[textureIndex + 1], textureData[textureIndex + 2]);
+                    yield return new Rgba32(textureData[textureIndex], textureData[textureIndex + 1], textureData[textureIndex + 2], textureData[textureIndex + 3]);
                 }
         }
 
         /// <inheritdoc cref="Save"/>
-        public byte[] Save(IEnumerable<Color> colors, EncodingSaveContext saveContext)
+        public byte[] Save(IEnumerable<Rgba32> colors, EncodingSaveContext saveContext)
         {
             // Get colors in unswizzled order, so the framework applies the swizzle correctly
             var paddedWidth = GetPaddedWidth(saveContext.Size.Width);

@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Kanvas
 {
@@ -8,8 +8,8 @@ namespace Kontract.Kanvas
 
         int GetBitDepth();
 
-        Color GetColor(long value);
+        Rgba32 GetColor(long value);
 
-        long GetValue(Color color);
+        long GetValue(Rgba32 color);
     }
 }

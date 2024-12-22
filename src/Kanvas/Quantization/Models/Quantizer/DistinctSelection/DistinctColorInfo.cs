@@ -1,5 +1,6 @@
-﻿using System;
-using System.Drawing;
+﻿using SixLabors.ImageSharp.PixelFormats;
+using System;
+using Kanvas.Extensions;
 
 namespace Kanvas.Quantization.Models.Quantizer.DistinctSelection
 {
@@ -9,7 +10,7 @@ namespace Kanvas.Quantization.Models.Quantizer.DistinctSelection
 
         public int Count { get; private set; }
 
-        public int Color { get; }
+        public uint Color { get; }
 
         public int Hue { get; }
 
@@ -17,9 +18,9 @@ namespace Kanvas.Quantization.Models.Quantizer.DistinctSelection
 
         public int Brightness { get; }
 
-        public DistinctColorInfo(Color color)
+        public DistinctColorInfo(Rgba32 color)
         {
-            Color = color.ToArgb();
+            Color = color.PackedValue;
 
             Hue = Convert.ToInt32(color.GetHue() * Factor);
             Saturation = Convert.ToInt32(color.GetSaturation() * Factor);

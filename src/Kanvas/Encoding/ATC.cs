@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using BCnEncoder.Decoder;
 using BCnEncoder.Encoder;
@@ -8,6 +7,7 @@ using BCnEncoder.Shared;
 using Kanvas.MoreEnumerable;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Encoding
 {
@@ -40,7 +40,7 @@ namespace Kanvas.Encoding
         }
 
         /// <inheritdoc cref="Load"/>
-        public IEnumerable<Color> Load(byte[] input, EncodingLoadContext loadContext)
+        public IEnumerable<Rgba32> Load(byte[] input, EncodingLoadContext loadContext)
         {
             var compressionFormat = GetCompressionFormat();
             var decoder = GetDecoder();
@@ -54,12 +54,12 @@ namespace Kanvas.Encoding
                     var decodedBlock = decoder.DecodeBlock(input.AsSpan(x * blockSize, blockSize), compressionFormat);
 
                     decodedBlock.TryGetMemory(out var memory);
-                    return memory.ToArray().Select(y => Color.FromArgb(y.a, y.r, y.g, y.b));
+                    return memory.ToArray().Select(y => new Rgba32( y.r, y.g, y.b, y.a));
                 });
         }
 
         /// <inheritdoc cref="Save"/>
-        public byte[] Save(IEnumerable<Color> colors, EncodingSaveContext saveContext)
+        public byte[] Save(IEnumerable<Rgba32> colors, EncodingSaveContext saveContext)
         {
             var compressionFormat = GetCompressionFormat();
             var encoder = GetEncoder(compressionFormat);

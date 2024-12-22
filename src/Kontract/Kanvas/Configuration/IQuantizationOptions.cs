@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Kanvas.Configuration
 {
-    public delegate IColorCache CreateColorCacheDelegate(IList<Color> palette);
-    public delegate IList<Color> CreatePaletteDelegate();
+    public delegate IColorCache CreateColorCacheDelegate(IList<Rgba32> palette);
+    public delegate IList<Rgba32> CreatePaletteDelegate();
     public delegate IColorQuantizer CreateColorQuantizerDelegate(int colorCount, int taskCount);
     public delegate IColorDitherer CreateColorDithererDelegate(Size imageSize, int taskCount);
 

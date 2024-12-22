@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.Linq;
 using Kanvas.Configuration;
 using Kontract;
@@ -10,6 +7,9 @@ using Kontract.Interfaces.Progress;
 using Kontract.Models.Image;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Kanvas
 {
@@ -19,9 +19,9 @@ namespace Kanvas
     /// </summary>
     public sealed class KanvasImage : IKanvasImage
     {
-        private Bitmap _decodedImage;
-        private Bitmap _bestImage;
-        private IList<Color> _decodedPalette;
+        private Image<Rgba32> _decodedImage;
+        private Image<Rgba32> _bestImage;
+        private IList<Rgba32> _decodedPalette;
 
         private int TaskCount => Environment.ProcessorCount;
 
@@ -34,7 +34,7 @@ namespace Kanvas
         public EncodingDefinition EncodingDefinition { get; }
 
         /// <inheritdoc />
-        public ImageInfo ImageInfo { get; }
+        public Kontract.Models.Image.ImageInfo ImageInfo { get; }
 
         /// <inheritdoc />
         public bool IsIndexed => IsIndexEncoding(ImageFormat);
@@ -62,7 +62,7 @@ namespace Kanvas
         /// </summary>
         /// <param name="encodingDefinition">The encoding definition for the image info.</param>
         /// <param name="imageInfo">The image info to represent.</param>
-        public KanvasImage(EncodingDefinition encodingDefinition, ImageInfo imageInfo)
+        public KanvasImage(EncodingDefinition encodingDefinition, Kontract.Models.Image.ImageInfo imageInfo)
         {
             ContractAssertions.IsNotNull(encodingDefinition, nameof(encodingDefinition));
             ContractAssertions.IsNotNull(imageInfo, nameof(imageInfo));
@@ -80,20 +80,20 @@ namespace Kanvas
         /// <param name="encodingDefinition">The encoding definition for the image info.</param>
         /// <param name="imageInfo">The image info to represent.</param>
         /// <param name="lockImage">Locks the image to its initial dimension and encodings. This will throw an exception in the methods that may try such changes.</param>
-        public KanvasImage(EncodingDefinition encodingDefinition, ImageInfo imageInfo, bool lockImage) :
+        public KanvasImage(EncodingDefinition encodingDefinition, Kontract.Models.Image.ImageInfo imageInfo, bool lockImage) :
             this(encodingDefinition, imageInfo)
         {
             IsImageLocked = lockImage;
         }
 
         /// <inheritdoc />
-        public Bitmap GetImage(IProgressContext progress = null)
+        public Image<Rgba32> GetImage(IProgressContext progress = null)
         {
             return DecodeImage(progress);
         }
 
         /// <inheritdoc />
-        public IList<Color> GetPalette(IProgressContext progress = null)
+        public IList<Rgba32> GetPalette(IProgressContext progress = null)
         {
             ContractAssertions.IsTrue(IsIndexed, nameof(IsIndexed));
 
@@ -101,7 +101,7 @@ namespace Kanvas
         }
 
         /// <inheritdoc />
-        public void SetImage(Bitmap image, IProgressContext progress = null)
+        public void SetImage(Image<Rgba32> image, IProgressContext progress = null)
         {
             // Check for locking
             if (IsImageLocked && (ImageSize.Width != image.Width || ImageSize.Height != image.Height))
@@ -123,7 +123,7 @@ namespace Kanvas
         }
 
         /// <inheritdoc />
-        public void SetPalette(IList<Color> palette, IProgressContext progress = null)
+        public void SetPalette(IList<Rgba32> palette, IProgressContext progress = null)
         {
             ContractAssertions.IsTrue(IsIndexed, nameof(IsIndexed));
 
@@ -164,7 +164,7 @@ namespace Kanvas
         }
 
         /// <inheritdoc />
-        public void SetColorInPalette(int paletteIndex, Color color)
+        public void SetColorInPalette(int paletteIndex, Rgba32 color)
         {
             ContractAssertions.IsTrue(IsIndexed, nameof(IsIndexed));
 
@@ -189,7 +189,7 @@ namespace Kanvas
             if (paletteIndex >= palette.Count)
                 throw new InvalidOperationException($"Palette index {paletteIndex} is out of range.");
 
-            image.SetPixel(point.X, point.Y, palette[paletteIndex]);
+            image[point.X, point.Y] = palette[paletteIndex];
 
             _decodedImage = image;
             var (imageData, paletteData) = EncodeImage(image, ImageInfo.ImageFormat, ImageInfo.PaletteFormat);
@@ -235,12 +235,12 @@ namespace Kanvas
             ImageInfo.ContentChanged = true;
         }
 
-        private Bitmap DecodeImage(IProgressContext progress = null)
+        private Image<Rgba32> DecodeImage(IProgressContext progress = null)
         {
             if (_decodedImage != null)
                 return _decodedImage;
 
-            Func<Bitmap> decodeImageAction;
+            Func<Image<Rgba32>> decodeImageAction;
             if (IsIndexed)
             {
                 var transcoder = CreateImageConfiguration(ImageFormat, PaletteFormat)
@@ -271,7 +271,7 @@ namespace Kanvas
         /// </summary>
         /// <param name="context"></param>
         /// <returns>Either buffered palette or decoded palette.</returns>
-        private IList<Color> DecodePalette(IProgressContext context = null)
+        private IList<Rgba32> DecodePalette(IProgressContext context = null)
         {
             if (_decodedPalette != null)
                 return _decodedPalette;
@@ -285,7 +285,7 @@ namespace Kanvas
         /// <param name="paletteData">Palette data to decode.</param>
         /// <param name="context"></param>
         /// <returns>Decoded palette.</returns>
-        private IList<Color> DecodePalette(byte[] paletteData, IProgressContext context = null)
+        private IList<Rgba32> DecodePalette(byte[] paletteData, IProgressContext context = null)
         {
             var paletteEncoding = EncodingDefinition.GetPaletteEncoding(PaletteFormat);
             return paletteEncoding
@@ -293,7 +293,7 @@ namespace Kanvas
                 .ToArray();
         }
 
-        private (IList<byte[]> imageData, byte[] paletteData) EncodeImage(Bitmap image, int imageFormat, int paletteFormat = -1,
+        private (IList<byte[]> imageData, byte[] paletteData) EncodeImage(Image<Rgba32> image, int imageFormat, int paletteFormat = -1,
             IProgressContext progress = null)
         {
             // Create transcoder
@@ -322,7 +322,7 @@ namespace Kanvas
             imageData[0] = mainImageData;
 
             // Decode palette if present, only when mip maps are needed
-            IList<Color> decodedPalette = null;
+            IList<Rgba32> decodedPalette = null;
             if (mainPaletteData != null && ImageInfo.MipMapCount > 0)
                 decodedPalette = DecodePalette(mainPaletteData);
 
@@ -330,7 +330,10 @@ namespace Kanvas
             var (width, height) = (image.Width / 2, image.Height / 2);
             for (var i = 0; i < ImageInfo.MipMapCount; i++)
             {
-                imageData[i + 1] = EncodeMipMap(ResizeImage(image, width, height), imageFormat, decodedPalette);
+                var mipmap = image.Clone();
+                mipmap.Mutate(img => img.Resize(width, height));
+
+                imageData[i + 1] = EncodeMipMap(mipmap, imageFormat, decodedPalette);
 
                 width /= 2;
                 height /= 2;
@@ -340,7 +343,7 @@ namespace Kanvas
         }
 
         // TODO: Use progress
-        private byte[] EncodeMipMap(Bitmap mipMap, int imageFormat, IList<Color> palette = null)
+        private byte[] EncodeMipMap(Image<Rgba32> mipMap, int imageFormat, IList<Rgba32> palette = null)
         {
             IImageTranscoder transcoder;
             if (IsIndexEncoding(imageFormat))
@@ -361,30 +364,7 @@ namespace Kanvas
             return transcoder.Encode(mipMap).imageData;
         }
 
-        private Bitmap ResizeImage(Image image, int width, int height)
-        {
-            var destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height);
-
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            using (var graphics = Graphics.FromImage(destImage))
-            {
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                using var wrapMode = new ImageAttributes();
-                wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-            }
-
-            return destImage;
-        }
-
-        private byte[] EncodePalette(IList<Color> palette, int paletteFormat)
+        private byte[] EncodePalette(IList<Rgba32> palette, int paletteFormat)
         {
             return EncodingDefinition.GetPaletteEncoding(paletteFormat)
                 .Save(palette, new EncodingSaveContext(new Size(1, palette.Count), TaskCount));

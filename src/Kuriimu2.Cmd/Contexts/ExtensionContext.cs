@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Kontract;
 using Kontract.Interfaces.Progress;
 using Kontract.Models.IO;
 using Kore.Batch;
+using Kore.Extensions;
 using Kore.Factories;
 using Kore.Managers;
 using Kore.Managers.Plugins;
@@ -15,11 +17,12 @@ namespace Kuriimu2.Cmd.Contexts
     class ExtensionContext : BaseContext
     {
         private readonly IContext _parentContext;
+        private readonly IFileManager _pluginManager;
 
         private readonly BatchExtractor _batchExtractor;
         private readonly BatchInjector _batchInjector;
 
-        public ExtensionContext(IInternalFileManager pluginManager, IContext parentContext, IProgressContext progressContext) :
+        public ExtensionContext(IFileManager pluginManager, IContext parentContext, IProgressContext progressContext) :
             base(progressContext)
         {
             ContractAssertions.IsNotNull(pluginManager, nameof(pluginManager));
@@ -28,6 +31,7 @@ namespace Kuriimu2.Cmd.Contexts
             var logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
             _parentContext = parentContext;
+            _pluginManager = pluginManager;
             _batchExtractor = new BatchExtractor(pluginManager, logger);
             _batchInjector = new BatchInjector(pluginManager, logger);
         }
@@ -80,7 +84,7 @@ namespace Kuriimu2.Cmd.Contexts
             var destinationFileSystem = FileSystemFactory.CreateSubFileSystem(outputDirectory.FullName, new StreamManager());
 
             _batchExtractor.ScanSubDirectories = true;
-            _batchExtractor.PluginId = pluginId;
+            _batchExtractor.Plugin = _pluginManager.GetFilePlugins().FirstOrDefault(p => p.PluginId == pluginId);
             await _batchExtractor.Process(sourceFileSystem, destinationFileSystem);
         }
 
@@ -93,7 +97,7 @@ namespace Kuriimu2.Cmd.Contexts
             var destinationFileSystem = FileSystemFactory.CreateSubFileSystem(outputDirectory.FullName, new StreamManager());
 
             _batchInjector.ScanSubDirectories = true;
-            _batchInjector.PluginId = pluginId;
+            _batchInjector.Plugin = _pluginManager.GetFilePlugins().FirstOrDefault(p => p.PluginId == pluginId);
             await _batchInjector.Process(sourceFileSystem, destinationFileSystem);
         }
 

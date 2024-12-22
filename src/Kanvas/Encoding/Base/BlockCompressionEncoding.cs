@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using Kanvas.MoreEnumerable;
@@ -7,6 +6,7 @@ using Komponent.IO;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
 using Kontract.Models.IO;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Encoding.Base
 {
@@ -32,7 +32,7 @@ namespace Kanvas.Encoding.Base
         }
 
         /// <inheritdoc cref="Load"/>
-        public IEnumerable<Color> Load(byte[] input, EncodingLoadContext loadContext)
+        public IEnumerable<Rgba32> Load(byte[] input, EncodingLoadContext loadContext)
         {
             var br = new BinaryReaderX(new MemoryStream(input), _byteOrder);
 
@@ -42,7 +42,7 @@ namespace Kanvas.Encoding.Base
         }
 
         /// <inheritdoc cref="Save"/>
-        public byte[] Save(IEnumerable<Color> colors, EncodingSaveContext saveContext)
+        public byte[] Save(IEnumerable<Rgba32> colors, EncodingSaveContext saveContext)
         {
             var ms = new MemoryStream();
             using var bw = new BinaryWriterX(ms, _byteOrder);
@@ -62,9 +62,9 @@ namespace Kanvas.Encoding.Base
 
         protected abstract void WriteNextBlock(BinaryWriterX bw, TBlock block);
 
-        protected abstract IList<Color> DecodeNextBlock(TBlock block);
+        protected abstract IList<Rgba32> DecodeNextBlock(TBlock block);
 
-        protected abstract TBlock EncodeNextBlock(IList<Color> colors);
+        protected abstract TBlock EncodeNextBlock(IList<Rgba32> colors);
 
         private IEnumerable<TBlock> ReadBlocks(BinaryReaderX br)
         {

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Kanvas.Encoding.BlockCompressions.ETC1;
 using Kanvas.Encoding.BlockCompressions.ETC1.Helper;
 using Kanvas.Encoding.BlockCompressions.ETC1.Models;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Encoding.BlockCompressions
 {
@@ -17,7 +16,7 @@ namespace Kanvas.Encoding.BlockCompressions
             _zOrdered = zOrdered;
         }
 
-        public IEnumerable<Color> DecodeBlocks(Etc1PixelData data)
+        public IEnumerable<Rgba32> DecodeBlocks(Etc1PixelData data)
         {
             var basec0 = data.Block.Color0.Scale(data.Block.ColorDepth);
             var basec1 = data.Block.Color1.Scale(data.Block.ColorDepth);
@@ -29,11 +28,11 @@ namespace Kanvas.Encoding.BlockCompressions
                 var mod = Constants.Modifiers[(i & flipbitmask) == 0 ? data.Block.Table0 : data.Block.Table1];
                 var c = basec + mod[data.Block[i]];
 
-                yield return Color.FromArgb((int)((data.Alpha >> (4 * i)) % 16 * 17), c.R, c.G, c.B);
+                yield return new Rgba32((byte)((data.Alpha >> (4 * i)) % 16 * 17), c.R, c.G, c.B);
             }
         }
 
-        public Etc1PixelData EncodeColors(IList<Color> colorBatch)
+        public Etc1PixelData EncodeColors(IList<Rgba32> colorBatch)
         {
             var colorsWindows = Enumerable.Range(0, 16).Select(j => _zOrdered ?
                 colorBatch[Constants.ZOrder[Constants.ZOrder[Constants.ZOrder[j]]]] :

@@ -14,11 +14,11 @@ namespace Kuriimu2.Cmd.Contexts
 {
     abstract class BaseFileContext : BaseContext
     {
-        protected IInternalFileManager PluginManager { get; }
+        protected IFileManager PluginManager { get; }
 
         protected ContextNode ContextNode { get; }
 
-        protected BaseFileContext(IInternalFileManager pluginManager, IProgressContext progressContext) :
+        protected BaseFileContext(IFileManager pluginManager, IProgressContext progressContext) :
             base(progressContext)
         {
             ContractAssertions.IsNotNull(progressContext, nameof(progressContext));
@@ -28,7 +28,7 @@ namespace Kuriimu2.Cmd.Contexts
             ContextNode = new ContextNode();
         }
 
-        protected BaseFileContext(IInternalFileManager pluginManager, ContextNode parentContextNode, IProgressContext progressContext) :
+        protected BaseFileContext(IFileManager pluginManager, ContextNode parentContextNode, IProgressContext progressContext) :
             base(progressContext)
         {
             PluginManager = pluginManager;

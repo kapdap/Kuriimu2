@@ -1,7 +1,6 @@
-﻿using System;
+﻿using SixLabors.ImageSharp.PixelFormats;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Dynamic;
 
 namespace Kanvas.Quantization.Models.Quantizer.Wu
 {
@@ -58,7 +57,7 @@ namespace Kanvas.Quantization.Models.Quantizer.Wu
             IndexAlphaCount = alphaCount;
         }
 
-        public void Create(IList<Color> colors)
+        public void Create(IList<Rgba32> colors)
         {
             InitializeTables(IndexCount * IndexCount * IndexCount * IndexAlphaCount);
 
@@ -76,7 +75,7 @@ namespace Kanvas.Quantization.Models.Quantizer.Wu
             M2 = new double[tableLength];
         }
 
-        private void FillTables(IList<Color> colors)
+        private void FillTables(IList<Rgba32> colors)
         {
             foreach (var color in colors)
             {

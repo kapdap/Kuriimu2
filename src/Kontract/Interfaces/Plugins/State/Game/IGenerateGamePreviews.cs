@@ -1,6 +1,6 @@
-﻿using System.Drawing;
-using Kontract.Interfaces.Plugins.State.Text;
-using Kontract.Models.Text;
+﻿using Kontract.Models.Text;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Interfaces.Plugins.State.Game
 {
@@ -14,6 +14,6 @@ namespace Kontract.Interfaces.Plugins.State.Game
         /// </summary>
         /// <param name="entry"></param>
         /// <returns></returns>
-        Bitmap GeneratePreview(TextEntry entry);
+        Image<Rgba32> GeneratePreview(TextEntry entry);
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Drawing;
 using Kontract;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Configuration;
 using Kontract.Kanvas.Model;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp;
 
 namespace Kanvas.Configuration
 {

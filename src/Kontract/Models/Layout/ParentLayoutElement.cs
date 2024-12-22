@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Models.Layout
 {
@@ -11,12 +12,12 @@ namespace Kontract.Models.Layout
         {
         }
 
-        public override void Draw(Graphics gr,bool drawBorder)
+        public override void Draw(Image<Rgba32> img, bool drawBorder)
         {
-            base.Draw(gr, drawBorder);
+            base.Draw(img, drawBorder);
             foreach (var child in Children)
             {
-                child.Draw(gr, drawBorder);
+                child.Draw(img, drawBorder);
             }
         }
     }

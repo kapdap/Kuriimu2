@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Linq;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas
 {
@@ -13,20 +13,20 @@ namespace Kanvas
     {
         #region ToBitmap
 
-        public static Bitmap ToBitmap(this IEnumerable<int> indices, IList<Color> palette, Size imageSize) =>
-            indices.Select(i => palette[i]).ToBitmap(imageSize);
+        public static Image<Rgba32> ToImage(this IEnumerable<int> indices, IList<Rgba32> palette, Size imageSize) =>
+            indices.Select(i => palette[i]).ToImage(imageSize);
 
-        public static Bitmap ToBitmap(this IEnumerable<int> indices, IList<Color> palette, Size imageSize, IImageSwizzle swizzle) =>
-            indices.Select(i => palette[i]).ToBitmap(imageSize, imageSize, swizzle, ImageAnchor.TopLeft);
+        public static Image<Rgba32> ToImage(this IEnumerable<int> indices, IList<Rgba32> palette, Size imageSize, IImageSwizzle swizzle) =>
+            indices.Select(i => palette[i]).ToImage(imageSize, imageSize, swizzle, ImageAnchor.TopLeft);
 
-        public static Bitmap ToBitmap(this IEnumerable<Color> colors, Size imageSize) =>
-            colors.ToBitmap(imageSize, imageSize, null, ImageAnchor.TopLeft);
+        public static Image<Rgba32> ToImage(this IEnumerable<Rgba32> colors, Size imageSize) =>
+            colors.ToImage(imageSize, imageSize, null, ImageAnchor.TopLeft);
 
-        public static Bitmap ToBitmap(this IEnumerable<Color> colors, Size imageSize, Size paddedSize) =>
-            colors.ToBitmap(imageSize, imageSize, null, ImageAnchor.TopLeft);
+        public static Image<Rgba32> ToImage(this IEnumerable<Rgba32> colors, Size imageSize, Size paddedSize) =>
+            colors.ToImage(imageSize, imageSize, null, ImageAnchor.TopLeft);
 
-        public static Bitmap ToBitmap(this IEnumerable<Color> colors, Size imageSize, IImageSwizzle swizzle) =>
-            colors.ToBitmap(imageSize, imageSize, swizzle, ImageAnchor.TopLeft);
+        public static Image<Rgba32> ToImage(this IEnumerable<Rgba32> colors, Size imageSize, IImageSwizzle swizzle) =>
+            colors.ToImage(imageSize, imageSize, swizzle, ImageAnchor.TopLeft);
 
         /// <summary>
         /// Compose an image from a collection of colors.
@@ -37,12 +37,9 @@ namespace Kanvas
         /// <param name="swizzle">The <see cref="IImageSwizzle"/> to resort the colors.</param>
         /// <param name="anchor">Defines where the image with its real size is anchored in the padded size.</param>
         /// <returns>The composed image.</returns>
-        public static Bitmap ToBitmap(this IEnumerable<Color> colors, Size imageSize, Size paddedSize, IImageSwizzle swizzle, ImageAnchor anchor)
+        public static Image<Rgba32> ToImage(this IEnumerable<Rgba32> colors, Size imageSize, Size paddedSize, IImageSwizzle swizzle, ImageAnchor anchor)
         {
-            var image = new Bitmap(imageSize.Width, imageSize.Height);
-
-            var bitmapData = image.LockBits(new Rectangle(Point.Empty, imageSize), ImageLockMode.WriteOnly,
-                PixelFormat.Format32bppArgb);
+            var image = new Image<Rgba32>(imageSize.Width, imageSize.Height);
 
             // Get point sequence modified by swizzle
             var finalSize = imageSize != paddedSize ? paddedSize : swizzle != null ? new Size(swizzle.Width, swizzle.Height) : imageSize;
@@ -72,12 +69,9 @@ namespace Kanvas
 
                 if (point.X >= imageSize.Width || point.Y >= imageSize.Height)
                     continue;
-
-                var index = point.Y * imageSize.Width + point.X;
-                SetColor(bitmapData, index, color);
+                
+                image[point.X, point.Y] = color;
             }
-
-            image.UnlockBits(bitmapData);
 
             return image;
         }
@@ -86,19 +80,19 @@ namespace Kanvas
 
         #region ToColors
 
-        public static IEnumerable<Color> ToColors(this IEnumerable<int> indices, IList<Color> palette) =>
+        public static IEnumerable<Rgba32> ToColors(this IEnumerable<int> indices, IList<Rgba32> palette) =>
             indices.Select(x => palette[x]);
 
-        public static IEnumerable<Color> ToColors(this Bitmap image) =>
+        public static IEnumerable<Rgba32> ToColors(this Image<Rgba32> image) =>
             image.ToColors(image.Size, null, ImageAnchor.TopLeft);
 
-        public static IEnumerable<Color> ToColors(this Bitmap image, Size paddedSize) =>
+        public static IEnumerable<Rgba32> ToColors(this Image<Rgba32> image, Size paddedSize) =>
             image.ToColors(paddedSize, null, ImageAnchor.TopLeft);
 
-        public static IEnumerable<Color> ToColors(this Bitmap image, IImageSwizzle swizzle) =>
+        public static IEnumerable<Rgba32> ToColors(this Image<Rgba32> image, IImageSwizzle swizzle) =>
             image.ToColors(image.Size, swizzle, ImageAnchor.TopLeft);
 
-        public static IEnumerable<Color> ToColors(this Bitmap image, Size paddedSize, ImageAnchor anchor) =>
+        public static IEnumerable<Rgba32> ToColors(this Image<Rgba32> image, Size paddedSize, ImageAnchor anchor) =>
             image.ToColors(paddedSize, null, anchor);
 
         /// <summary>
@@ -109,11 +103,8 @@ namespace Kanvas
         /// <param name="swizzle">The <see cref="IImageSwizzle"/> to resort the colors.</param>
         /// <param name="anchor">Defines where the image with its real size is anchored in the padded size.</param>
         /// <returns>The collection of colors.</returns>
-        public static IEnumerable<Color> ToColors(this Bitmap image, Size paddedSize, IImageSwizzle swizzle, ImageAnchor anchor)
+        public static IEnumerable<Rgba32> ToColors(this Image<Rgba32> image, Size paddedSize, IImageSwizzle swizzle, ImageAnchor anchor)
         {
-            var bitmapData = image.LockBits(new Rectangle(Point.Empty, image.Size), ImageLockMode.ReadOnly,
-                PixelFormat.Format32bppArgb);
-
             var finalSize = image.Size != paddedSize ? paddedSize : swizzle != null ? new Size(swizzle.Width, swizzle.Height) : image.Size;
 
             // Get difference between final padded size and real size
@@ -149,37 +140,34 @@ namespace Kanvas
                     point = new Point(point.X - widthDiff, point.Y);
 
                 // If point is out of bounds of source image, return default color
-                if (point.X >= bitmapData.Width || point.Y >= bitmapData.Height)
+                if (point.X >= image.Width || point.Y >= image.Height)
                 {
                     yield return Color.Black;
                     continue;
                 }
 
-                // Otherwise return color from source image at the given index
-                var index = point.Y * bitmapData.Width + point.X;
-                yield return GetColor(bitmapData, index);
+                // Otherwise return color from source image at the given point
+                yield return image[point.X, point.Y];
             }
-
-            image.UnlockBits(bitmapData);
         }
 
         #endregion
 
         #region ToIndices
 
-        public static IEnumerable<int> ToIndices(this Bitmap image, IList<Color> palette) =>
+        public static IEnumerable<int> ToIndices(this Image<Rgba32> image, IList<Rgba32> palette) =>
             image.ToColors().ToIndices(palette);
 
-        public static IEnumerable<int> ToIndices(this Bitmap image, IColorCache colorCache) =>
+        public static IEnumerable<int> ToIndices(this Image<Rgba32> image, IColorCache colorCache) =>
             image.ToColors().ToIndices(colorCache);
 
-        public static IEnumerable<int> ToIndices(this IEnumerable<Color> colors, IList<Color> palette)
+        public static IEnumerable<int> ToIndices(this IEnumerable<Rgba32> colors, IList<Rgba32> palette)
         {
-            var foundColors = new Dictionary<int, int>();
+            var foundColors = new Dictionary<Rgba32, int>();
 
-            foreach (var color in colors)
+            foreach (Rgba32 color in colors)
             {
-                var colorValue = color.ToArgb();
+                var colorValue = color;
                 if (foundColors.ContainsKey(colorValue))
                 {
                     yield return foundColors[colorValue];
@@ -188,9 +176,9 @@ namespace Kanvas
 
                 for (var i = 0; i < palette.Count; i++)
                 {
-                    if (palette[i].ToArgb() == colorValue)
+                    if (palette[i] == colorValue)
                     {
-                        foundColors[palette[i].ToArgb()] = i;
+                        foundColors[palette[i]] = i;
                         yield return i;
                         break;
                     }
@@ -198,7 +186,7 @@ namespace Kanvas
             }
         }
 
-        public static IEnumerable<int> ToIndices(this IEnumerable<Color> colors, IColorCache colorCache) =>
+        public static IEnumerable<int> ToIndices(this IEnumerable<Rgba32> colors, IColorCache colorCache) =>
             colors.Select(colorCache.GetPaletteIndex);
 
         #endregion
@@ -224,16 +212,6 @@ namespace Kanvas
 
         private static IEnumerable<Point> Clamp(this IEnumerable<Point> points, Point min, Point max) =>
             points.Select(p => new Point(Math.Clamp(p.X, min.X, max.X), Math.Clamp(p.Y, min.Y, max.Y)));
-
-        // ReSharper disable once PossibleNullReferenceException
-        private static unsafe Color GetColor(BitmapData bitmapData, int index) =>
-            Color.FromArgb(((int*)bitmapData.Scan0)[index]);
-
-        // ReSharper disable once PossibleNullReferenceException
-        private static unsafe void SetColor(BitmapData bitmapData, int index, Color color)
-        {
-            ((int*)bitmapData.Scan0)[index] = color.ToArgb();
-        }
 
         private static Point GetMinPoint(int widthDiff, int heightDiff, ImageAnchor anchor)
         {

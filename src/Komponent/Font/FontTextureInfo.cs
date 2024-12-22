@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Komponent.Font
 {
     public class FontTextureInfo
     {
-        public Bitmap FontTexture { get; }
+        public Image<Rgba32> FontTexture { get; }
 
-        public IList<(Bitmap, Point)> Glyphs { get; }
+        public IList<(Image<Rgba32>, Point)> Glyphs { get; }
 
-        public FontTextureInfo(Bitmap fontTexture, IList<(Bitmap, Point)> glyphs)
+        public FontTextureInfo(Image<Rgba32> fontTexture, IList<(Image<Rgba32>, Point)> glyphs)
         {
             FontTexture = fontTexture;
             Glyphs = glyphs;

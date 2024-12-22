@@ -1,11 +1,12 @@
-﻿using System.Drawing;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Kontract.Extensions;
 using Kontract.Interfaces.FileSystem;
 using Kontract.Interfaces.Plugins.State;
 using Kontract.Models.IO;
 using Kore.Managers.Plugins;
 using Serilog;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kore.Batch
 {
@@ -71,7 +72,7 @@ namespace Kore.Batch
                 if (!destinationFileSystem.FileExists(path))
                     continue;
 
-                var openedImage = (Bitmap)Image.FromStream(destinationFileSystem.OpenFile(path));
+                var openedImage = Image.Load<Rgba32>(path);
                 img.SetImage(openedImage);
             }
         }

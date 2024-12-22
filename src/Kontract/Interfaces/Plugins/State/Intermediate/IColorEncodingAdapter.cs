@@ -1,7 +1,7 @@
-﻿using System;
-using System.Drawing;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Kontract.Interfaces.Progress;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Interfaces.Plugins.State.Intermediate
 {
@@ -31,7 +31,7 @@ namespace Kontract.Interfaces.Plugins.State.Intermediate
         /// <param name="height">Height of the final image.</param>
         /// <param name="progress">Reports progress.</param>
         /// <returns>The decoded image.</returns>
-        Task<Bitmap> Decode(byte[] imgData, int width, int height, IProgressContext progress);
+        Task<Image<Rgba32>> Decode(byte[] imgData, int width, int height, IProgressContext progress);
 
         /// <summary>
         /// Encodes an image to byte data.
@@ -39,6 +39,6 @@ namespace Kontract.Interfaces.Plugins.State.Intermediate
         /// <param name="img">Image to encode.</param>
         /// <param name="progress">Reports progress.</param>
         /// <returns>The encoded data.</returns>
-        Task<byte[]> Encode(Bitmap img, IProgressContext progress);
+        Task<byte[]> Encode(Image<Rgba32> img, IProgressContext progress);
     }
 }

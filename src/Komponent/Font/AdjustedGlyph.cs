@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Komponent.Font
 {
@@ -15,24 +16,24 @@ namespace Komponent.Font
         /// <summary>
         /// The glyph.
         /// </summary>
-        public Bitmap Glyph { get; }
+        public Image<Rgba32> Glyph { get; }
 
         /// <summary>
-        /// Creates a new instance of <see cref="AdjustedGlyph"/> with no adjustements to it.
+        /// Creates a new instance of <see cref="AdjustedGlyph"/> with no adjustments to it.
         /// </summary>
         /// <param name="glyph">The glyph.</param>
-        public AdjustedGlyph(Bitmap glyph)
+        public AdjustedGlyph(Image<Rgba32> glyph)
         {
             WhiteSpaceAdjustment = null;
             Glyph = glyph;
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="AdjustedGlyph"/> with no adjustements to it.
+        /// Creates a new instance of <see cref="AdjustedGlyph"/> with no adjustments to it.
         /// </summary>
         /// <param name="glyph">The glyph.</param>
         /// <param name="adjustment">The adjustments made to reduce white space in a glyph.</param>
-        public AdjustedGlyph(Bitmap glyph, WhiteSpaceAdjustment adjustment)
+        public AdjustedGlyph(Image<Rgba32> glyph, WhiteSpaceAdjustment adjustment)
         {
             WhiteSpaceAdjustment = adjustment;
             Glyph = glyph;

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Komponent.Utilities;
 using Kontract;
 using Kontract.Kanvas;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Encoding.Descriptors
 {
@@ -58,7 +58,7 @@ namespace Kanvas.Encoding.Descriptors
             return _depthTable[0] + _depthTable[1];
         }
 
-        public Color GetColor(long value, IList<Color> palette)
+        public Rgba32 GetColor(long value, IList<Rgba32> palette)
         {
             var colorBuffer = new int[3];
 
@@ -70,10 +70,10 @@ namespace Kanvas.Encoding.Descriptors
                 return palette[colorBuffer[0]];
 
             var paletteColor = palette[colorBuffer[0]];
-            return Color.FromArgb(colorBuffer[1], paletteColor.R, paletteColor.G, paletteColor.B);
+            return new Rgba32(paletteColor.R, paletteColor.G, paletteColor.B, (byte)colorBuffer[1]);
         }
 
-        public long GetValue(int index, IList<Color> palette)
+        public long GetValue(int index, IList<Rgba32> palette)
         {
             var result = 0L;
             var colorBuffer = new[] { index, palette[index].A, 0 };

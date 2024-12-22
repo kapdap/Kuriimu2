@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Komponent.Utilities;
 using Kontract;
 using Kontract.Kanvas;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Encoding.Descriptors
 {
@@ -56,7 +57,7 @@ namespace Kanvas.Encoding.Descriptors
             return _depthTable[0] + _depthTable[1] + _depthTable[2] + _depthTable[3];
         }
 
-        public Color GetColor(long value)
+        public Rgba32 GetColor(long value)
         {
             // colorBuffer[4] is reserved for the X color component, and will be ignored when the color is constructed
             var colorBuffer = new int[5];
@@ -70,10 +71,10 @@ namespace Kanvas.Encoding.Descriptors
             if (_depthTable[_componentIndexTable[0]] == 0)
                 colorBuffer[_indexTable[_componentIndexTable[0]]] = 255;
 
-            return Color.FromArgb(colorBuffer[0], colorBuffer[1], colorBuffer[2], colorBuffer[3]);
+            return new Rgba32((byte)colorBuffer[1], (byte)colorBuffer[2], (byte)colorBuffer[3], (byte)colorBuffer[0]);
         }
 
-        public long GetValue(Color color)
+        public long GetValue(Rgba32 color)
         {
             // colorBuffer[4] is reserved for the X color component
             var colorBuffer = new[] { color.A, color.R, color.G, color.B, 0 };

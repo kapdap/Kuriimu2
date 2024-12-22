@@ -1,5 +1,6 @@
-﻿using System;
-using System.Drawing;
+﻿using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp;
+using System;
 
 namespace Kontract.Models.Font
 {
@@ -21,7 +22,7 @@ namespace Kontract.Models.Font
         /// <summary>
         /// The glyph of the character.
         /// </summary>
-        public System.Drawing.Image Glyph { get; protected set; }
+        public Image<Rgba32> Glyph { get; protected set; }
 
         /// <summary>
         /// Determines if the content of this character was changed.
@@ -29,7 +30,7 @@ namespace Kontract.Models.Font
         /// <remarks>Should only be set by this class or the responsible plugin.</remarks>
         public bool ContentChanged { get; set; }
 
-        public CharacterInfo(uint codePoint, Size characterSize, System.Drawing.Image glyph)
+        public CharacterInfo(uint codePoint, Size characterSize, Image<Rgba32> glyph)
         {
             CodePoint = codePoint;
             CharacterSize = characterSize;
@@ -53,7 +54,7 @@ namespace Kontract.Models.Font
         /// Sets the glyph.
         /// </summary>
         /// <param name="newGlyph">The new glyph for this instance.</param>
-        public void SetGlyph(System.Drawing.Image newGlyph)
+        public void SetGlyph(Image<Rgba32> newGlyph)
         {
             if (Glyph == newGlyph)
                 return;
@@ -65,7 +66,7 @@ namespace Kontract.Models.Font
         /// <inheritdoc cref="Clone"/>
         public virtual object Clone()
         {
-            return new CharacterInfo(CodePoint, CharacterSize, (System.Drawing.Image)Glyph.Clone());
+            return new CharacterInfo(CodePoint, CharacterSize, Glyph.Clone());
         }
 
         /// <inheritdoc cref="ToString"/>

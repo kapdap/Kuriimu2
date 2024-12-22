@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kontract;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
 using Kontract.Models.IO;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Encoding.Base
 {
@@ -43,7 +43,7 @@ namespace Kanvas.Encoding.Base
         }
 
         /// <inheritdoc cref="Load"/>
-        public IEnumerable<Color> Load(byte[] input, EncodingLoadContext loadContext)
+        public IEnumerable<Rgba32> Load(byte[] input, EncodingLoadContext loadContext)
         {
             var bits = loadContext.Size.Width * loadContext.Size.Height * BitsPerValue;
             var length = bits / 8 + (bits % 8 > 0 ? 1 : 0);
@@ -54,7 +54,7 @@ namespace Kanvas.Encoding.Base
         }
 
         /// <inheritdoc cref="Load"/>
-        public byte[] Save(IEnumerable<Color> colors, EncodingSaveContext saveContext)
+        public byte[] Save(IEnumerable<Rgba32> colors, EncodingSaveContext saveContext)
         {
             var values = colors.AsParallel().AsOrdered()
                 .WithDegreeOfParallelism(saveContext.TaskCount)

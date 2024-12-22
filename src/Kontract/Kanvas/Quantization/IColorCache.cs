@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
-using Kontract.Kanvas.Model;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Kanvas.Quantization
 {
@@ -12,13 +12,13 @@ namespace Kontract.Kanvas.Quantization
         /// <summary>
         /// The cached palette.
         /// </summary>
-        IList<Color> Palette { get; }
+        IList<Rgba32> Palette { get; }
 
         /// <summary>
         /// Gets the index of the nearest color in the cache.
         /// </summary>
         /// <param name="color">The color to compare with.</param>
         /// <returns>Index of nearest color in the cache.</returns>
-        int GetPaletteIndex(Color color);
+        int GetPaletteIndex(Rgba32 color);
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Quantization.ColorCaches
 {
@@ -10,18 +11,18 @@ namespace Kanvas.Quantization.ColorCaches
     /// </summary>
     public class EuclideanDistanceColorCache : BaseColorCache
     {
-        private readonly ConcurrentDictionary<int, int> _cache;
+        private readonly ConcurrentDictionary<Rgba32, int> _cache;
 
-        public EuclideanDistanceColorCache(IList<Color> palette) :
+        public EuclideanDistanceColorCache(IList<Rgba32> palette) :
             base(palette)
         {
-            _cache = new ConcurrentDictionary<int, int>();
+            _cache = new ConcurrentDictionary<Rgba32, int>();
         }
 
         /// <inheritdoc />
-        public override int GetPaletteIndex(Color color)
+        public override int GetPaletteIndex(Rgba32 color)
         {
-            return _cache.AddOrUpdate(color.ToArgb(),
+            return _cache.AddOrUpdate(color,
                 colorKey =>
                 {
                     int paletteIndexInside = CalculatePaletteIndexInternal(color);
@@ -30,7 +31,7 @@ namespace Kanvas.Quantization.ColorCaches
                 (colorKey, inputIndex) => inputIndex);
         }
 
-        private int CalculatePaletteIndexInternal(Color color)
+        private int CalculatePaletteIndexInternal(Rgba32 color)
         {
             return EuclideanHelper.GetSmallestEuclideanDistanceIndex(Palette, color);
         }

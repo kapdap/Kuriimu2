@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using SixLabors.ImageSharp.PixelFormats;
+using System.Collections.Generic;
 
 namespace Kontract.Kanvas.Quantization
 {
@@ -14,6 +14,6 @@ namespace Kontract.Kanvas.Quantization
         /// <param name="colors">The collection to quantize and dither.</param>
         /// <param name="colorCache"></param>
         /// <returns></returns>
-        IEnumerable<int> Process(IEnumerable<Color> colors, IColorCache colorCache);
+        IEnumerable<int> Process(IEnumerable<Rgba32> colors, IColorCache colorCache);
     }
 }

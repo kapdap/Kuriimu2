@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Quantization.Ditherers.Ordered
 {
@@ -25,7 +26,7 @@ namespace Kanvas.Quantization.Ditherers.Ordered
             _matrixHeight = Matrix.GetLength(1);
         }
 
-        public IEnumerable<int> Process(IEnumerable<Color> colors, IColorCache colorCache)
+        public IEnumerable<int> Process(IEnumerable<Rgba32> colors, IColorCache colorCache)
         {
             return Zip(colors, Composition.GetPointSequence(_imageSize))
                 .AsParallel().AsOrdered()
@@ -33,15 +34,15 @@ namespace Kanvas.Quantization.Ditherers.Ordered
                 .Select(cp => DitherColor(cp, colorCache));
         }
 
-        private int DitherColor((Color, Point) colorPoint, IColorCache colorCache)
+        private int DitherColor((Rgba32, Point) colorPoint, IColorCache colorCache)
         {
             var threshold = GetThreshold(colorPoint.Item2);
 
-            var red = Clamp(colorPoint.Item1.R + threshold, 0, 255);
-            var green = Clamp(colorPoint.Item1.G + threshold, 0, 255);
-            var blue = Clamp(colorPoint.Item1.B + threshold, 0, 255);
+            var red = (byte)Clamp(colorPoint.Item1.R + threshold, 0, 255);
+            var green = (byte)Clamp(colorPoint.Item1.G + threshold, 0, 255);
+            var blue = (byte)Clamp(colorPoint.Item1.B + threshold, 0, 255);
 
-            return colorCache.GetPaletteIndex(Color.FromArgb(colorPoint.Item1.A, red, green, blue));
+            return colorCache.GetPaletteIndex(new Rgba32(colorPoint.Item1.A, red, green, blue));
         }
 
         private int GetThreshold(Point point)

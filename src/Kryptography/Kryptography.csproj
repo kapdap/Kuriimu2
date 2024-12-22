@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -9,7 +9,7 @@
 
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageId>Kryptography</PackageId>
-    <PackageVersion>2.0.10</PackageVersion>
+    <PackageVersion>2.0.11</PackageVersion>
     <Authors>onepiecefreak</Authors>
     <Company>Fan Translators International</Company>
     <Product>Kryptography</Product>
@@ -24,7 +24,7 @@
 
   <PropertyGroup>
     <SelfContained>false</SelfContained>
-    <PublishSingleFile>True</PublishSingleFile>
+    <PublishSingleFile>true</PublishSingleFile>
     <PublishReadyToRun>False</PublishReadyToRun>
   </PropertyGroup>
 
