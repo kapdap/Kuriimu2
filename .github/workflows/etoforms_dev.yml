@@ -13,18 +13,18 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: nuget/setup-nuget@v1
+    - uses: actions/checkout@v4
+    - uses: nuget/setup-nuget@v2
     
     - name: Wait for other dev builds
-      uses: softprops/turnstyle@v1
+      uses: softprops/turnstyle@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 3.1.302
+        dotnet-version: 8.0
 
     - name: Setup NuGet sources
       run: |
@@ -135,7 +135,7 @@ jobs:
         dest: ./update/Mac/latest.zip
       
     - name: Install openSSL
-      uses: crazy-max/ghaction-chocolatey@v1
+      uses: crazy-max/ghaction-chocolatey@v3
       with:
         args: install openssl.light
       
@@ -174,19 +174,19 @@ jobs:
         github_token: ${{ secrets.PRIVATE_ACCESS_TOKEN }}
       
     - name: Upload Windows artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: Kuriimu2 Windows
         path: ./dist/final/Wpf
         
     - name: Upload Linux artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: Kuriimu2 Linux
         path: ./dist/final/Gtk
         
     - name: Upload Mac artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: Kuriimu2 Mac
         path: ./dist/final/Mac
