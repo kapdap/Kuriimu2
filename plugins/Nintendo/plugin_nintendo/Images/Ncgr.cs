@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
-using Kanvas.Configuration;
 using Kanvas.Swizzle;
 using Komponent.IO;
-using Kontract.Models.Image;
 using plugin_nintendo.Nitro;
+using SixLabors.ImageSharp;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_nintendo.Images
 {

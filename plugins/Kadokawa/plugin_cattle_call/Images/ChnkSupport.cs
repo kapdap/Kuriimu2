@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kanvas;
 using Kanvas.Encoding;
@@ -8,6 +7,7 @@ using Komponent.IO.Attributes;
 using Kontract.Kanvas;
 using Kontract.Models.Image;
 using Kontract.Models.IO;
+using SixLabors.ImageSharp.PixelFormats;
 using Index = Kanvas.Encoding.Index;
 
 namespace plugin_cattle_call.Images
@@ -72,19 +72,19 @@ namespace plugin_cattle_call.Images
             return 2 << (int)Math.Log(value - 1, 2);
         }
 
-        public static Color InterpolateHalf(this Color c0, Color c1) =>
+        public static Rgba32 InterpolateHalf(this Rgba32 c0, Rgba32 c1) =>
             InterpolateColor(c0, c1, 1, 2);
 
-        public static Color InterpolateEighth(this Color c0, Color c1, int num) =>
+        public static Rgba32 InterpolateEighth(this Rgba32 c0, Rgba32 c1, int num) =>
             InterpolateColor(c0, c1, num, 8);
 
-        private static Color InterpolateColor(this Color c0, Color c1, int num, int den) => Color.FromArgb(
-            Interpolate(c0.A, c1.A, num, den),
+        private static Rgba32 InterpolateColor(this Rgba32 c0, Rgba32 c1, int num, int den) => new Rgba32(
             Interpolate(c0.R, c1.R, num, den),
             Interpolate(c0.G, c1.G, num, den),
-            Interpolate(c0.B, c1.B, num, den));
+            Interpolate(c0.B, c1.B, num, den),
+            Interpolate(c0.A, c1.A, num, den));
 
-        private static int Interpolate(int a, int b, int num, int den, int correction = 0) =>
-            (int)(((den - num) * a + num * b + correction) / (float)den);
+        private static byte Interpolate(int a, int b, int num, int den, int correction = 0) =>
+            (byte)(((den - num) * a + num * b + correction) / (float)den);
     }
 }

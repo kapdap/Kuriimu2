@@ -1,9 +1,9 @@
-﻿using System.Drawing;
-using System.IO;
+﻿using System.IO;
 using Kanvas.Swizzle;
 using Kanvas.Swizzle.Models;
 using Komponent.IO;
-using Kontract.Models.Image;
+using SixLabors.ImageSharp;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_spike_chunsoft.Images
 {

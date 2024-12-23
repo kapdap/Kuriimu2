@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using Komponent.Extensions;
 using Komponent.Font;
 using Komponent.IO;
 using Kontract.Models.Font;
 using plugin_level5.Compression;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace plugin_level5._3DS.Fonts
 {
@@ -20,58 +22,46 @@ namespace plugin_level5._3DS.Fonts
 
         private readonly ColorMatrix[] _colorMatrices =
         {
-            new ColorMatrix(new[]
-            {
-                new[] { 0f, 0, 0, 1f, 0 },
-                new[] { 0, 0f, 0, 0, 0 },
-                new[] { 0, 0, 0f, 0, 0 },
-                new[] { 0, 0, 0, 0f, 0 },
-                new[] { 1f, 1f, 1f, 0, 1f }
-            }),
-            new ColorMatrix(new[]
-            {
-                new[] { 0f, 0, 0, 0, 0 },
-                new[] { 0, 0f, 0, 1f, 0 },
-                new[] { 0, 0, 0f, 0, 0 },
-                new[] { 0, 0, 0, 0f, 0 },
-                new[] { 1f, 1f, 1f, 0, 1f }
-            }),
-            new ColorMatrix(new[]
-            {
-                new[] { 0f, 0, 0, 0, 0 },
-                new[] { 0, 0f, 0, 0, 0 },
-                new[] { 0, 0, 0f, 1f, 0 },
-                new[] { 0, 0, 0, 0f, 0 },
-                new[] { 1f, 1f, 1f, 0, 1f }
-            })
+            new(
+                0f, 0f, 0f, 1f,
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                1f, 1f, 1f, 0f),
+            new(
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 1f,
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                1f, 1f, 1f, 0f),
+            new(
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 1f,
+                0f, 0f, 0f, 0f,
+                1f, 1f, 1f, 0f),
         };
 
         private readonly ColorMatrix[] _inverseColorMatrices =
         {
-            new ColorMatrix(new[]
-            {
-                new[] { 0f, 0, 0, 0, 0 },
-                new[] { 0, 0f, 0, 0, 0 },
-                new[] { 0, 0, 0f, 0, 0 },
-                new[] { 1f, 0, 0, 0f, 0 },
-                new[] { 0, 0, 0, 1f, 1f }
-            }),
-            new ColorMatrix(new[]
-            {
-                new[] { 0f, 0, 0, 0, 0 },
-                new[] { 0, 0f, 0, 0, 0 },
-                new[] { 0, 0, 0f, 0, 0 },
-                new[] { 0, 1f, 0, 0f, 0 },
-                new[] { 0, 0, 0, 1f, 1f }
-            }),
-            new ColorMatrix(new[]
-            {
-                new[] { 0f, 0, 0, 0, 0 },
-                new[] { 0, 0f, 0, 0, 0 },
-                new[] { 0, 0, 0f, 0, 0 },
-                new[] { 0, 0, 1f, 0f, 0 },
-                new[] { 0, 0, 0, 1f, 1f }
-            })
+            new(
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                1f, 0f, 0f, 0f,
+                0f, 0f, 0f, 1f),
+            new(
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                0f, 1f, 0f, 0f,
+                0f, 0f, 0f, 1f),
+            new(
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                0f, 0f, 1f, 0f,
+                0f, 0f, 0f, 1f),
         };
 
         public XfHeader Header { get; private set; }
@@ -120,10 +110,10 @@ namespace plugin_level5._3DS.Fonts
             return result;
         }
 
-        public (Stream fontStream, Image fontImage) Save(List<CharacterInfo> characterInfos, Size imageSize)
+        public (Stream fontStream, Image<Rgba32> fontImage) Save(List<CharacterInfo> characterInfos, Size imageSize)
         {
             // Generating font textures
-            var adjustedGlyphs = FontMeasurement.MeasureWhiteSpace(characterInfos.Select(x => (Bitmap)x.Glyph)).ToList();
+            var adjustedGlyphs = FontMeasurement.MeasureWhiteSpace(characterInfos.Select(x => x.Glyph)).ToList();
 
             // Adjust image size for at least the biggest letter
             var height = Math.Max(adjustedGlyphs.Max(x => x.WhiteSpaceAdjustment.GlyphSize.Height), imageSize.Height);
@@ -174,6 +164,9 @@ namespace plugin_level5._3DS.Fonts
                         joinedCharacter.character.CharacterSize.Width - charSizeInfo.offsetX
                 };
 
+                // Only used for Time Travelers
+                charInformation.charWidth--;
+
                 charMaps.Add((joinedCharacter.adjustedGlyph, new XfCharMap
                 {
                     codePoint = (ushort)codePoint,
@@ -207,6 +200,9 @@ namespace plugin_level5._3DS.Fonts
                             imageOffsetY = joinedCharacter.texturePosition.Y
                         }
                     }));
+
+                    // Only used for Time Travelers
+                    charInformation.charWidth--;
                 }
             }
 
@@ -220,23 +216,10 @@ namespace plugin_level5._3DS.Fonts
             Header.smallCharHeight = 0;
 
             // Draw textures
-            var img = new Bitmap(imageSize.Width, imageSize.Height);
-            var chn = new Bitmap(imageSize.Width, imageSize.Height);
-            var gfx = Graphics.FromImage(chn);
+            var img = new Image<Rgba32>(imageSize.Width, imageSize.Height);
+            var chn = new Image<Rgba32>(imageSize.Width, imageSize.Height);
             for (var i = 0; i < textureInfos.Count; i++)
-            {
-                var destPoints = new[]
-                {
-                    new PointF(0,0),
-                    new PointF(textureInfos[i].FontTexture.Width,0),
-                    new PointF(0,textureInfos[i].FontTexture.Height)
-                };
-                var rect = new RectangleF(0, 0, textureInfos[i].FontTexture.Width, textureInfos[i].FontTexture.Height);
-                var attr = new ImageAttributes();
-                attr.SetColorMatrix(_inverseColorMatrices[i]);
-                gfx.DrawImage(textureInfos[i].FontTexture, destPoints, rect, GraphicsUnit.Pixel, attr);
-                img.PutChannel(chn);
-            }
+                img.Mutate(context => context.Filter(_inverseColorMatrices[i]).DrawImage(textureInfos[i].FontTexture, 1f));
 
             // Save fnt.bin
             var savedFntBin = new MemoryStream();
@@ -268,33 +251,29 @@ namespace plugin_level5._3DS.Fonts
             return (savedFntBin, img);
         }
 
-        private Bitmap GetGlyphBitmap(Image fontImage, XfCharMap charMap, XfCharSizeInfo charSizeInfo)
+        private Image<Rgba32> GetGlyphBitmap(Image fontImage, XfCharMap charMap, XfCharSizeInfo charSizeInfo)
         {
             // Destination points
-            var destPoints = new[]
-            {
-                new PointF(charSizeInfo.offsetX, charSizeInfo.offsetY),
-                new PointF(charSizeInfo.glyphWidth+charSizeInfo.offsetX, charSizeInfo.offsetY),
-                new PointF(charSizeInfo.offsetX, charSizeInfo.glyphHeight+charSizeInfo.offsetY)
-            };
+            var destRect = new Rectangle(
+                charSizeInfo.offsetX, charSizeInfo.offsetY,
+                charSizeInfo.glyphWidth, charSizeInfo.glyphHeight);
 
             // Source rectangle
-            var srcRect = new RectangleF(
+            var srcRect = new Rectangle(
                 charMap.imageInformation.imageOffsetX,
                 charMap.imageInformation.imageOffsetY,
                 charSizeInfo.glyphWidth,
                 charSizeInfo.glyphHeight);
 
-            // Color matrix
-            var imageAttributes = new ImageAttributes();
-            imageAttributes.SetColorMatrix(_colorMatrices[charMap.imageInformation.colorChannel]);
-
             // Draw the glyph from the master texture
-            var glyph = new Bitmap(
+            var glyph = new Image<Rgba32>(
                 Math.Max(1, Math.Max(charMap.charInformation.charWidth, charSizeInfo.glyphWidth + charSizeInfo.offsetX)),
                 Math.Max(1, charSizeInfo.glyphHeight + charSizeInfo.offsetY));
-            var gfx = Graphics.FromImage(glyph);
-            gfx.DrawImage(fontImage, destPoints, srcRect, GraphicsUnit.Pixel, imageAttributes);
+
+            glyph.Mutate(context => context
+                .Filter(_colorMatrices[charMap.imageInformation.colorChannel])
+                .Clip(new RectangularPolygon(destRect), context1 => context1
+                    .DrawImage(fontImage, srcRect, 1f)));
 
             return glyph;
         }

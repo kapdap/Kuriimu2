@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
 using Kanvas.Swizzle;
 using Kanvas.Swizzle.Models;
 using Komponent.IO;
-using Kontract.Kanvas;
-using Kontract.Models.Image;
-using Kontract.Models.IO;
 using plugin_nintendo.NW4C;
+using SixLabors.ImageSharp;
+using ByteOrder = Kontract.Models.IO.ByteOrder;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_nintendo.Images
 {
@@ -141,7 +140,7 @@ namespace plugin_nintendo.Images
             // Create image info
             var imageInfo = new ImageInfo(imageData, _bflimHeader.format, size);
             imageInfo.RemapPixels.With(context => IsCtr
-                ? (IImageSwizzle)new CtrSwizzle(context, (CtrTransformation)_bflimHeader.swizzleTileMode)
+                ? new CtrSwizzle(context, (CtrTransformation)_bflimHeader.swizzleTileMode)
                 : new CafeSwizzle(context, _bflimHeader.swizzleTileMode));
 
             if (IsCtr)

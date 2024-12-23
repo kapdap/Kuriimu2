@@ -21,7 +21,7 @@ namespace plugin_nintendo.Archives
             using var br = new BinaryReaderX(input, true);
 
             // Read header
-            _header = br.ReadType<NcsdHeader>();
+            _header = ReadHeader(br);
 
             // Parse NCCH partitions
             var result = new List<IArchiveFileInfo>();
@@ -33,6 +33,7 @@ namespace plugin_nintendo.Archives
 
                 var name = GetPartitionName(i);
                 var fileStream = new SubStream(input, (long)partitionEntry.offset * MediaSize_, (long)partitionEntry.length * MediaSize_);
+
                 result.Add(new ArchiveFileInfo(fileStream, name)
                 {
                     // Add NCCH plugin
@@ -134,6 +135,86 @@ namespace plugin_nintendo.Archives
                 default:
                     throw new InvalidOperationException($"Partition name {name} is not associated.");
             }
+        }
+
+        private NcsdHeader ReadHeader(BinaryReaderX br)
+        {
+            return new NcsdHeader
+            {
+                rsa2048 = br.ReadBytes(0x100),
+                magic = br.ReadString(4),
+                ncsdSize = br.ReadInt32(),
+                mediaId = br.ReadInt64(),
+                partitionFsType = br.ReadBytes(8),
+                partitionCryptType = br.ReadBytes(8),
+                partitionEntries = ReadNcsdPartitionEntries(br),
+                cardHeader = ReadCardHeader(br)
+            };
+        }
+
+        private NcsdPartitionEntry[] ReadNcsdPartitionEntries(BinaryReaderX br)
+        {
+            var result = new NcsdPartitionEntry[8];
+
+            for (var i = 0; i < 8; i++)
+                result[i] = ReadNcsdPartitionEntry(br);
+
+            return result;
+        }
+
+        private NcsdPartitionEntry ReadNcsdPartitionEntry(BinaryReaderX br)
+        {
+            return new NcsdPartitionEntry
+            {
+                offset = br.ReadInt32(),
+                length = br.ReadInt32()
+            };
+        }
+
+        private NcsdCardHeader ReadCardHeader(BinaryReaderX br)
+        {
+            return new NcsdCardHeader
+            {
+                exHeaderHash = br.ReadBytes(0x20),
+                additionalHeaderSize = br.ReadInt32(),
+                sectorZeroOffset = br.ReadInt32(),
+                partitionFlags = br.ReadBytes(8),
+                partitionIds = new[]
+                {
+                    br.ReadInt64(),
+                    br.ReadInt64(),
+                    br.ReadInt64(),
+                    br.ReadInt64(),
+                    br.ReadInt64(),
+                    br.ReadInt64(),
+                    br.ReadInt64(),
+                    br.ReadInt64()
+                },
+                reserved1 = br.ReadBytes(0x20),
+                reserved2 = br.ReadBytes(0xE),
+                unk1 = br.ReadByte(),
+                unk2 = br.ReadByte(),
+                cardInfoHeader = ReadCardInfoHeader(br)
+            };
+        }
+
+        private NcsdCardInfoHeader ReadCardInfoHeader(BinaryReaderX br)
+        {
+            return new NcsdCardInfoHeader
+            {
+                card2WriteAddress = br.ReadInt32(),
+                cardBitMask = br.ReadInt32(),
+                reserved1 = br.ReadBytes(0x108),
+                titleVersion = br.ReadInt16(),
+                cardRevision = br.ReadInt16(),
+                reserved2 = br.ReadBytes(0xCEC),
+                cardSeedKeyY = br.ReadBytes(0x10),
+                encryptedCardSeed = br.ReadBytes(0x10),
+                cardSeedAesMac = br.ReadBytes(0x10),
+                cardSeedNonce = br.ReadBytes(0xC),
+                reserved3 = br.ReadBytes(0xC4),
+                firstNcchHeader = br.ReadBytes(0x100)
+            };
         }
     }
 }

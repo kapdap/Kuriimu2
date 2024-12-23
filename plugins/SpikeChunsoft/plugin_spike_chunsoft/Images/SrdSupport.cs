@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using Kanvas;
 using Komponent.IO.Attributes;
 using Kontract.Kanvas;
 using Kontract.Models.Image;
-using Kontract.Models.IO;
+using SixLabors.ImageSharp;
+using ByteOrder = Kontract.Models.IO.ByteOrder;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_spike_chunsoft.Images
 {

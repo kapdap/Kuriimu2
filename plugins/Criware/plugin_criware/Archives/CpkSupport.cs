@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using Komponent.IO;
 using Komponent.IO.Attributes;
+using Kontract.Interfaces.Progress;
 using Kontract.Kompression.Configuration;
 using Kontract.Models.Archive;
 using plugin_criware.Archives.Support;
@@ -14,11 +15,11 @@ namespace plugin_criware.Archives
     /// <summary>
     /// Standard header for CPK tables.
     /// </summary>
-    public class CpkTableHeader
+    public struct CpkTableHeader
     {
         [FixedLength(4)]
         public string magic;
-        public int flags = 0xFF;    // Not encrypted by default
+        public int flags;    // 0xFF - Not encrypted by default
         public int packetSize;
         public int zero0;
 
@@ -28,10 +29,10 @@ namespace plugin_criware.Archives
     /// <summary>
     /// Standard CPK table info block.
     /// </summary>
-    public class CpkTableInfo
+    public struct CpkTableInfo
     {
         [FixedLength(4)]
-        public string magic = "@UTF";
+        public string magic;
         public int tableSize;
         public int valuesOffset;
         public int stringsOffset;
@@ -54,6 +55,22 @@ namespace plugin_criware.Archives
         public CpkArchiveFileInfo(Stream fileData, string filePath, CpkRow row, IKompressionConfiguration configuration, long decompressedSize) : base(fileData, filePath, configuration, decompressedSize)
         {
             Row = row;
+        }
+
+        public override long SaveFileData(Stream output, bool compress, IProgressContext progress = null)
+        {
+            if (!ContentChanged)
+                return base.SaveFileData(output, compress, progress);
+
+            Stream baseStream = GetBaseStream();
+            if (baseStream.Length <= 0x100)
+            {
+                // HINT: Only recompress new file data, if it exceeds the raw length limit of the compression
+                baseStream.CopyTo(output);
+                return baseStream.Length;
+            }
+
+            return base.SaveFileData(output, compress, progress);
         }
     }
 

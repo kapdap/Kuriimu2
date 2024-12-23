@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using Kanvas;
 using Kanvas.Encoding;
 using Komponent.IO.Attributes;
 using Kontract.Kanvas;
 using Kontract.Models.Image;
+using SixLabors.ImageSharp;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_bandai_namco.Images
 {

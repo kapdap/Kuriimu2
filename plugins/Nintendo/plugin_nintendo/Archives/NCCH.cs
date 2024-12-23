@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using K4os.Compression.LZ4.Streams.Frames;
 using Komponent.IO;
 using Komponent.IO.Streams;
 using Kontract.Extensions;
@@ -29,7 +30,7 @@ namespace plugin_nintendo.Archives
             using var br = new BinaryReaderX(input, true);
 
             // Read header
-            _ncchHeader = br.ReadType<NcchHeader>();
+            _ncchHeader = ReadHeader(br);
 
             var result = new List<IArchiveFileInfo>();
 
@@ -61,7 +62,7 @@ namespace plugin_nintendo.Archives
             {
                 // Read and resolve ExeFS data
                 br.BaseStream.Position = _ncchHeader.exeFsOffset * MediaSize_;
-                var exeFs = br.ReadType<NcchExeFsHeader>();
+                var exeFs = ReadExeFsHeader(br);
                 var exeFsFilePosition = br.BaseStream.Position;
 
                 // Add Files from ExeFS
@@ -219,6 +220,90 @@ namespace plugin_nintendo.Archives
 
             bw.BaseStream.Position = 0;
             bw.WriteType(_ncchHeader);
+        }
+
+        private NcchHeader ReadHeader(BinaryReaderX br)
+        {
+            return new NcchHeader
+            {
+                rsa2048 = br.ReadBytes(0x100),
+                magic = br.ReadString(4),
+                ncchSize = br.ReadInt32(),
+                partitionId = br.ReadUInt64(),
+                makerCode = br.ReadInt16(),
+                version = br.ReadInt16(),
+                seedHashVerifier = br.ReadUInt32(),
+                programID = br.ReadUInt64(),
+                reserved1 = br.ReadBytes(0x10),
+                logoRegionHash = br.ReadBytes(0x20),
+                productCode = br.ReadBytes(0x10),
+                exHeaderHash = br.ReadBytes(0x20),
+                exHeaderSize = br.ReadInt32(),
+                reserved2 = br.ReadInt32(),
+                ncchFlags = br.ReadBytes(8),
+                plainRegionOffset = br.ReadInt32(),
+                plainRegionSize = br.ReadInt32(),
+                logoRegionOffset = br.ReadInt32(),
+                logoRegionSize = br.ReadInt32(),
+                exeFsOffset = br.ReadInt32(),
+                exeFsSize = br.ReadInt32(),
+                exeFsHashRegionSize = br.ReadInt32(),
+                reserved3 = br.ReadInt32(),
+                romFsOffset = br.ReadInt32(),
+                romFsSize = br.ReadInt32(),
+                romFsHashRegionSize = br.ReadInt32(),
+                reserved4 = br.ReadInt32(),
+                exeFsSuperBlockHash = br.ReadBytes(0x20),
+                romFsSuperBlockHash = br.ReadBytes(0x20)
+            };
+        }
+
+        private NcchExeFsHeader ReadExeFsHeader(BinaryReaderX br)
+        {
+            return new NcchExeFsHeader
+            {
+                fileEntries = ReadExeFsFileEntries(br),
+                reserved1 = br.ReadBytes(0x20),
+                fileEntryHashes = ReadExeFsFileEntryHashes(br)
+            };
+        }
+
+        private NcchExeFsFileEntry[] ReadExeFsFileEntries(BinaryReaderX br)
+        {
+            var result = new NcchExeFsFileEntry[10];
+
+            for (var i = 0; i < 10; i++)
+                result[i] = ReadExeFsFileEntry(br);
+
+            return result;
+        }
+
+        private NcchExeFsFileEntry ReadExeFsFileEntry(BinaryReaderX br)
+        {
+            return new NcchExeFsFileEntry
+            {
+                name = br.ReadString(8),
+                offset = br.ReadInt32(),
+                size = br.ReadInt32()
+            };
+        }
+
+        private NcchExeFsFileEntryHash[] ReadExeFsFileEntryHashes(BinaryReaderX br)
+        {
+            var result = new NcchExeFsFileEntryHash[10];
+
+            for (var i = 0; i < 10; i++)
+                result[i] = ReadExeFsFileEntryHash(br);
+
+            return result;
+        }
+
+        private NcchExeFsFileEntryHash ReadExeFsFileEntryHash(BinaryReaderX br)
+        {
+            return new NcchExeFsFileEntryHash
+            {
+                hash = br.ReadBytes(0x20)
+            };
         }
     }
 }

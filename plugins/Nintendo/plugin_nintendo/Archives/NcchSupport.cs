@@ -13,7 +13,7 @@ using Kontract.Models.IO;
 
 namespace plugin_nintendo.Archives
 {
-    class NcchHeader
+    struct NcchHeader
     {
         [FixedLength(0x100)]
         public byte[] rsa2048;
@@ -55,7 +55,7 @@ namespace plugin_nintendo.Archives
         public byte[] romFsSuperBlockHash;
     }
 
-    class NcchExeFsHeader
+    struct NcchExeFsHeader
     {
         [FixedLength(0xA)]
         public NcchExeFsFileEntry[] fileEntries;
@@ -65,7 +65,7 @@ namespace plugin_nintendo.Archives
         public NcchExeFsFileEntryHash[] fileEntryHashes;
     }
 
-    class NcchExeFsFileEntry
+    struct NcchExeFsFileEntry
     {
         [FixedLength(8)]
         public string name;
@@ -73,7 +73,7 @@ namespace plugin_nintendo.Archives
         public int size;
     }
 
-    class NcchExeFsFileEntryHash
+    struct NcchExeFsFileEntryHash
     {
         [FixedLength(0x20)]
         public byte[] hash;
@@ -95,13 +95,13 @@ namespace plugin_nintendo.Archives
 
             // Read header
             var romFsOffset = br.BaseStream.Position;
-            header = br.ReadType<NcchRomFsHeader>();
+            header = ReadHeader(br);
             masterHash = br.ReadBytes(header.masterHashSize);
 
             // Read Level 3
             lv3Offset = romFsOffset + 0x1000;
             br.BaseStream.Position = lv3Offset;
-            lv3Header = br.ReadType<NcchRomFsLevelHeader>();
+            lv3Header = ReadLevelHeader(br);
 
             // Resolve file and directory tree
             br.BaseStream.Position = lv3Offset + lv3Header.dirMetaTableOffset;
@@ -111,7 +111,7 @@ namespace plugin_nintendo.Archives
 
         private void ResolveDirectories(BinaryReaderX br, string currentPath = "")
         {
-            var currentDirEntry = br.ReadType<NcchRomFsDirectoryMetaData>();
+            var currentDirEntry = ReadDirectoryMetaData(br);
 
             // First go through all sub dirs
             if (currentDirEntry.firstChildDirOffset != -1)
@@ -130,7 +130,7 @@ namespace plugin_nintendo.Archives
                 do
                 {
                     br.BaseStream.Position = lv3Offset + lv3Header.fileMetaTableOffset + fileOffset;
-                    currentFileEntry = br.ReadType<NcchRomFsFileMetaData>();
+                    currentFileEntry = ReadFileMetaData(br);
 
                     // Add current file
                     Files.Add(new FinalFileInfo
@@ -152,6 +152,81 @@ namespace plugin_nintendo.Archives
             }
         }
 
+        private NcchRomFsHeader ReadHeader(BinaryReaderX br)
+        {
+            return new NcchRomFsHeader
+            {
+                magic = br.ReadString(4),
+                magicNumber = br.ReadInt32(),
+                masterHashSize = br.ReadInt32(),
+                lv1LogicalOffset = br.ReadInt64(),
+                lv1HashDataSize = br.ReadInt64(),
+                lv1BlockSize = br.ReadInt32(),
+                reserved1 = br.ReadInt32(),
+                lv2LogicalOffset = br.ReadInt64(),
+                lv2HashDataSize = br.ReadInt64(),
+                lv2BlockSize = br.ReadInt32(),
+                reserved2 = br.ReadInt32(),
+                lv3LogicalOffset = br.ReadInt64(),
+                lv3HashDataSize = br.ReadInt64(),
+                lv3BlockSize = br.ReadInt32(),
+                reserved3 = br.ReadInt32(),
+                headerLength = br.ReadInt32(),
+                infoSize = br.ReadInt32()
+            };
+        }
+
+        private NcchRomFsLevelHeader ReadLevelHeader(BinaryReaderX br)
+        {
+            return new NcchRomFsLevelHeader
+            {
+                headerLength = br.ReadInt32(),
+                dirHashTableOffset = br.ReadInt32(),
+                dirHashTableSize = br.ReadInt32(),
+                dirMetaTableOffset = br.ReadInt32(),
+                dirMetaTableSize = br.ReadInt32(),
+                fileHashTableOffset = br.ReadInt32(),
+                fileHashTableSize = br.ReadInt32(),
+                fileMetaTableOffset = br.ReadInt32(),
+                fileMetaTableSize = br.ReadInt32(),
+                fileDataOffset = br.ReadInt32()
+            };
+        }
+
+        private NcchRomFsDirectoryMetaData ReadDirectoryMetaData(BinaryReaderX br)
+        {
+            var result = new NcchRomFsDirectoryMetaData
+            {
+                parentDirOffset = br.ReadInt32(),
+                nextSiblingDirOffset = br.ReadInt32(),
+                firstChildDirOffset = br.ReadInt32(),
+                firstFileOffset = br.ReadInt32(),
+                nextDirInSameBucketOffset = br.ReadInt32(),
+                nameLength = br.ReadInt32()
+            };
+
+            result.name = br.ReadString(result.nameLength, Encoding.Unicode);
+
+            return result;
+        }
+
+        private NcchRomFsFileMetaData ReadFileMetaData(BinaryReaderX br)
+        {
+            var result = new NcchRomFsFileMetaData
+            {
+                containingDirOffset = br.ReadInt32(),
+                nextSiblingFileOffset = br.ReadInt32(),
+                fileOffset = br.ReadInt64(),
+                fileSize = br.ReadInt64(),
+                nextFileInSameBucketOffset = br.ReadInt32(),
+                nameLength = br.ReadInt32()
+            };
+
+            result.name = br.ReadString(result.nameLength, Encoding.Unicode);
+
+            return result;
+        }
+
         [DebuggerDisplay("{filePath}")]
         public class FinalFileInfo
         {
@@ -162,29 +237,29 @@ namespace plugin_nintendo.Archives
     }
 
     [Alignment(0x10)]
-    class NcchRomFsHeader
+    struct NcchRomFsHeader
     {
         [FixedLength(4)]
-        public string magic = "IVFC";
-        public int magicNumber = 0x10000;
+        public string magic;
+        public int magicNumber;
         public int masterHashSize;
         public long lv1LogicalOffset;
         public long lv1HashDataSize;
-        public int lv1BlockSize = 0xC;
-        public int reserved1 = 0;
+        public int lv1BlockSize;
+        public int reserved1;
         public long lv2LogicalOffset;
         public long lv2HashDataSize;
-        public int lv2BlockSize = 0xC;
-        public int reserved2 = 0;
+        public int lv2BlockSize;
+        public int reserved2;
         public long lv3LogicalOffset;
         public long lv3HashDataSize;
-        public int lv3BlockSize = 0xC;
-        public int reserved3 = 0;
-        public int headerLength = 0x5C;
-        public int infoSize = 0;
+        public int lv3BlockSize;
+        public int reserved3;
+        public int headerLength;
+        public int infoSize;
     }
 
-    class NcchRomFsLevelHeader
+    struct NcchRomFsLevelHeader
     {
         public int headerLength;
         public int dirHashTableOffset;
@@ -198,7 +273,7 @@ namespace plugin_nintendo.Archives
         public int fileDataOffset;
     }
 
-    class NcchRomFsDirectoryMetaData
+    struct NcchRomFsDirectoryMetaData
     {
         public int parentDirOffset;
         public int nextSiblingDirOffset;
@@ -210,7 +285,7 @@ namespace plugin_nintendo.Archives
         public string name;
     }
 
-    class NcchRomFsFileMetaData
+    struct NcchRomFsFileMetaData
     {
         public int containingDirOffset;
         public int nextSiblingFileOffset;
@@ -633,16 +708,24 @@ namespace plugin_nintendo.Archives
             bw.BaseStream.Position = 0;
             bw.WriteType(new NcchRomFsHeader
             {
+                magic = "IVFC",
+                magicNumber = 0x10000,
+
                 masterHashSize = (int)levelData[2].Item2,
 
                 lv1LogicalOffset = 0,
                 lv1HashDataSize = levelData[1].Item2,
+                lv1BlockSize = 0xC,
 
                 lv2LogicalOffset = levelData[1].Item3,
                 lv2HashDataSize = levelData[0].Item2,
+                lv2BlockSize = 0xC,
 
                 lv3LogicalOffset = levelData[1].Item3 + levelData[0].Item3,
-                lv3HashDataSize = metaDataSize
+                lv3HashDataSize = metaDataSize,
+                lv3BlockSize = 0xC,
+
+                headerLength = 0x5C
             });
 
             var romFsSize = levelData[0].Item1 + levelData[0].Item3;

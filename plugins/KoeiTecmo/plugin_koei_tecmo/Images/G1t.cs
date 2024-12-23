@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using Komponent.IO;
-using Kontract.Models.Image;
-using Kontract.Models.IO;
+using SixLabors.ImageSharp;
+using ByteOrder = Kontract.Models.IO.ByteOrder;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_koei_tecmo.Images
 {

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using Kanvas.Swizzle;
 using Komponent.IO;
-using Kontract.Models.Image;
-using Kontract.Models.IO;
+using SixLabors.ImageSharp;
+using ByteOrder = Kontract.Models.IO.ByteOrder;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_mt_framework.Images
 {
@@ -171,7 +171,7 @@ namespace plugin_mt_framework.Images
             {
                 // Read mips
                 var mipData = new List<byte[]>();
-                for (var m = 1; m < _header.mipCount; m++)
+                for (var m = 0; m < _header.mipCount; m++)
                 {
                     var mipSize = (_header.width >> m) * (_header.height >> m) * bitDepth / 8;
 
@@ -184,10 +184,11 @@ namespace plugin_mt_framework.Images
 
                 if (_header.mipCount > 1)
                     imageInfo.MipMapData = mipData.Skip(1).ToArray();
-
-                // TODO: Remove block swizzle with pre-swizzle implementation in Kanvas
+                
                 if (colorsPerValue > 1)
                     imageInfo.RemapPixels.With(context => new BcSwizzle(context));
+                else
+                    imageInfo.RemapPixels.With(context => new VitaSwizzle(context));
 
                 imageInfos.Add(imageInfo);
             }
@@ -207,6 +208,7 @@ namespace plugin_mt_framework.Images
             // HINT: Calculating dataSize by bitsPerValue and colorsPerValue, since bitDepth can be 0 or some float due to ASTC
             var bitsPerValue = MtTexSupport.SwitchFormats[_header.format].BitsPerValue;
             var colorsPerValue = MtTexSupport.SwitchFormats[_header.format].ColorsPerValue;
+
             var dataSize = _header.width * _header.height / colorsPerValue * bitsPerValue / 8;
             var imageData = br.ReadBytes(dataSize);
 
@@ -255,6 +257,7 @@ namespace plugin_mt_framework.Images
             // HINT: Calculating dataSize by bitsPerValue and colorsPerValue, since bitDepth can be 0 or some float due to ASTC
             var bitsPerValue = encodings[format].BitsPerValue;
             var colorsPerValue = encodings[format].ColorsPerValue;
+
             var dataSize = width * height / colorsPerValue * bitsPerValue / 8;
             var imageData = br.ReadBytes(dataSize);
 

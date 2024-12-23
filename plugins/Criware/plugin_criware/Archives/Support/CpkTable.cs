@@ -7,6 +7,7 @@ using Komponent.IO;
 using Komponent.IO.Streams;
 using Kontract.Models.IO;
 using Kryptography;
+using static System.Runtime.InteropServices.Marshalling.IIUnknownCacheStrategy;
 
 namespace plugin_criware.Archives.Support
 {
@@ -26,8 +27,8 @@ namespace plugin_criware.Archives.Support
             0x37, 0x83, 0xBF, 0xAB, 0x07, 0x93, 0x0F, 0x3B, 0xD7, 0xA3
         };
 
-        private static readonly int HeaderSize = Tools.MeasureType(typeof(CpkTableHeader));
-        private static readonly int TableInfoSize = Tools.MeasureType(typeof(CpkTableInfo));
+        private static readonly int HeaderSize = 0x10;
+        private static readonly int TableInfoSize = 0x20;
 
         private IList<CpkColumnInfo> _columns;
 
@@ -63,7 +64,7 @@ namespace plugin_criware.Archives.Support
             using var br = new BinaryReaderX(input, true);
 
             // Read table header
-            var header = br.ReadType<CpkTableHeader>();
+            var header = ReadTableHeader(br);
 
             // Create UTF stream
             Stream utfStream = new SubStream(input, offset + 0x10, header.packetSize);
@@ -77,7 +78,7 @@ namespace plugin_criware.Archives.Support
         {
             // Read table info
             using var utfBr = new BinaryReaderX(utfStream, ByteOrder.BigEndian);
-            var tableInfo = utfBr.ReadType<CpkTableInfo>();
+            var tableInfo = ReadTableInfo(utfBr);
 
             // Create readers
             var tableStream = new SubStream(utfStream, 0x8, tableInfo.tableSize);
@@ -108,6 +109,33 @@ namespace plugin_criware.Archives.Support
                 rows.Add(ReadRow(tableBr, stringBr, dataBr, columns));
 
             return new CpkTable(tableMagic, name, columns, rows);
+        }
+
+        private static CpkTableHeader ReadTableHeader(BinaryReaderX br)
+        {
+            return new CpkTableHeader
+            {
+                magic = br.ReadString(4),
+                flags = br.ReadInt32(),
+                packetSize = br.ReadInt32(),
+                zero0 = br.ReadInt32()
+            };
+        }
+
+        private static CpkTableInfo ReadTableInfo(BinaryReaderX br)
+        {
+            return new CpkTableInfo
+            {
+                magic = br.ReadString(4),
+                tableSize = br.ReadInt32(),
+                valuesOffset = br.ReadInt32(),
+                stringsOffset = br.ReadInt32(),
+                binaryOffset = br.ReadInt32(),
+                nameOffset = br.ReadInt32(),
+                columnCount = br.ReadInt16(),
+                rowLength = br.ReadInt16(),
+                rowCount = br.ReadInt32()
+            };
         }
 
         #endregion
@@ -182,6 +210,7 @@ namespace plugin_criware.Archives.Support
             // Write table info
             var tableInfo = new CpkTableInfo
             {
+                magic = "@UTF",
                 tableSize = (int)(dataPosition - tableInfoOffset - 0x8),
                 valuesOffset = (int)(valuesOffset - tableInfoOffset - 0x8),
                 stringsOffset = (int)(stringOffset - tableInfoOffset - 0x8),
@@ -193,7 +222,7 @@ namespace plugin_criware.Archives.Support
             };
 
             bw.BaseStream.Position = tableInfoOffset;
-            bw.WriteType(tableInfo);
+            WriteTableInfo(bw, tableInfo);
 
             if (!writeHeader)
                 return;
@@ -203,11 +232,33 @@ namespace plugin_criware.Archives.Support
             var header = new CpkTableHeader
             {
                 magic = Id,
+                flags = 0xFF,
                 packetSize = (int)(dataPosition - offset - 0x10)
             };
 
             bw.BaseStream.Position = headerOffset;
-            bw.WriteType(header);
+            WriteHeader(bw, header);
+        }
+
+        private void WriteTableInfo(BinaryWriterX bw, CpkTableInfo tableInfo)
+        {
+            bw.WriteString(tableInfo.magic, Encoding.ASCII, false, false);
+            bw.Write(tableInfo.tableSize);
+            bw.Write(tableInfo.valuesOffset);
+            bw.Write(tableInfo.stringsOffset);
+            bw.Write(tableInfo.binaryOffset);
+            bw.Write(tableInfo.nameOffset);
+            bw.Write(tableInfo.columnCount);
+            bw.Write(tableInfo.rowLength);
+            bw.Write(tableInfo.rowCount);
+        }
+
+        private void WriteHeader(BinaryWriterX bw, CpkTableHeader header)
+        {
+            bw.WriteString(header.magic, Encoding.ASCII, false, false);
+            bw.Write(header.flags);
+            bw.Write(header.packetSize);
+            bw.Write(header.zero0);
         }
 
         public int CalculateSize(bool writeHeader = true)

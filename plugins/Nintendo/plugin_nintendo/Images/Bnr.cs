@@ -1,10 +1,10 @@
-﻿using System.Drawing;
-using System.IO;
+﻿using System.IO;
 using Kanvas.Swizzle;
 using Komponent.IO;
 using Komponent.IO.Streams;
-using Kontract.Models.Image;
 using Kryptography.Hash.Crc;
+using SixLabors.ImageSharp;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_nintendo.Images
 {

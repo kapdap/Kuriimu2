@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kanvas;
 using Komponent.IO.Attributes;
 using Kontract.Kanvas;
 using Kontract.Models.Image;
 using Kontract.Models.IO;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace plugin_atlus.Images
 {
@@ -95,14 +95,14 @@ namespace plugin_atlus.Images
 
     class TmxColorShader : IColorShader
     {
-        public Color Read(Color c)
+        public Rgba32 Read(Rgba32 c)
         {
-            return Color.FromArgb(ScaleAlpha(c.A), c.R, c.B, c.G);
+            return new Rgba32(c.R, c.B, c.G, ScaleAlpha(c.A));
         }
 
-        public Color Write(Color c)
+        public Rgba32 Write(Rgba32 c)
         {
-            return Color.FromArgb(UnscaleAlpha(c.A), c.R, c.G, c.B);
+            return new Rgba32(c.R, c.G, c.B, UnscaleAlpha(c.A));
         }
 
         private byte ScaleAlpha(byte a) => (byte)Math.Min(a / 128f * 255f, 0xFF);

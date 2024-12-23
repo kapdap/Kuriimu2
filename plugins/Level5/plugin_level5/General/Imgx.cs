@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using Komponent.IO;
 using Komponent.IO.Streams;
 using Kontract.Kanvas;
-using Kontract.Models.Image;
 using Kryptography.Hash.Crc;
 using plugin_level5.Compression;
+using SixLabors.ImageSharp;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_level5.General
 {
