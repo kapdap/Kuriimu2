@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,9 +11,11 @@ using Kontract.Models.IO;
 
 namespace plugin_level5._3DS.Archives
 {
-    public class XpckState : IArchiveState, ILoadFiles, ISaveFiles, IReplaceFiles
+    public class XpckState : IArchiveState, ILoadFiles, ISaveFiles, IReplaceFiles, IRenameFiles, IRemoveFiles, IAddFiles
     {
         private readonly Xpck _xpck;
+        private bool _hasDeletedFiles;
+        private bool _hasAddedFiles;
 
         public IList<IArchiveFileInfo> Files { get; private set; }
         public bool ContentChanged => IsChanged();
@@ -44,7 +46,33 @@ namespace plugin_level5._3DS.Archives
 
         private bool IsChanged()
         {
-            return Files.Any(x => x.ContentChanged);
+            return _hasDeletedFiles || _hasAddedFiles || Files.Any(x => x.ContentChanged);
+        }
+
+        public void Rename(IArchiveFileInfo afi, UPath path)
+        {
+            afi.FilePath = path;
+        }
+        public void RemoveFile(IArchiveFileInfo afi)
+        {
+            Files.Remove(afi);
+            _hasDeletedFiles = true;
+        }
+
+        public void RemoveAll()
+        {
+            Files.Clear();
+            _hasDeletedFiles = true;
+        }
+
+        public IArchiveFileInfo AddFile(Stream fileData, UPath filePath)
+        {
+            var newAfi = new XpckArchiveFileInfo(fileData, filePath.FullName, new XpckFileInfo());
+            Files.Add(newAfi);
+
+            _hasAddedFiles = true;
+
+            return newAfi;
         }
     }
 }
