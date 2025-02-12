@@ -1,7 +1,5 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using Komponent.IO;
-using Komponent.IO.Attributes;
 using Komponent.IO.Streams;
 using Kompression.Exceptions;
 using Kompression.IO;
@@ -18,7 +16,7 @@ namespace Kompression.Implementations.Decoders
         {
             using var br = new BinaryReaderX(input, true);
 
-            var header = br.ReadType<CrilaylaHeader>();
+            var header = ReadHeader(br);
             if (header.magic != "CRILAYLA" || header.magic == "\0\0\0\0\0\0\0\0")
                 throw new InvalidCompressionException("Crilayla");
 
@@ -79,12 +77,21 @@ namespace Kompression.Implementations.Decoders
         {
             // Nothing to dispose
         }
+
+        private CrilaylaHeader ReadHeader(BinaryReaderX br)
+        {
+            return new CrilaylaHeader
+            {
+                magic = br.ReadString(8),
+                decompSize = br.ReadInt32(),
+                compSize = br.ReadInt32()
+            };
+        }
     }
 
-    class CrilaylaHeader
+    struct CrilaylaHeader
     {
-        [FixedLength(8)]
-        public string magic = "CRILAYLA";
+        public string magic;
         public int decompSize;
         public int compSize;
     }

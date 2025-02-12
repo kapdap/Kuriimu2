@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>8</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Kanvas\Kanvas.csproj" />
     <ProjectReference Include="..\Komponent\Komponent.csproj" />
     <ProjectReference Include="..\Kontract\Kontract.csproj" />
   </ItemGroup>

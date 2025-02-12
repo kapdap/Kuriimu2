@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Kanvas.Quantization
 {
@@ -28,13 +28,13 @@ namespace Kontract.Kanvas.Quantization
         /// </summary>
         /// <param name="colors"></param>
         /// <returns></returns>
-        IList<Color> CreatePalette(IEnumerable<Color> colors);
+        IList<Rgba32> CreatePalette(IEnumerable<Rgba32> colors);
 
         /// <summary>
         /// Gets the fixed color cache for this quantizer.
         /// </summary>
         /// <param name="palette">The palette to store in the fixed color cache.</param>
         /// <returns>The fixed color cache for this quantizer.</returns>
-        IColorCache GetFixedColorCache(IList<Color> palette);
+        IColorCache GetFixedColorCache(IList<Rgba32> palette);
     }
 }

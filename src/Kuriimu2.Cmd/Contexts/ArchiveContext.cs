@@ -24,7 +24,7 @@ namespace Kuriimu2.Cmd.Contexts
         private readonly IFileSystem _archiveFileSystem;
         private readonly IContext _parentContext;
 
-        public ArchiveContext(ContextNode contextNode, IContext parentContext, IInternalFileManager pluginManager, IProgressContext progressContext) :
+        public ArchiveContext(ContextNode contextNode, IContext parentContext, IFileManager pluginManager, IProgressContext progressContext) :
             base(pluginManager, contextNode, progressContext)
         {
             ContractAssertions.IsNotNull(contextNode, nameof(contextNode));

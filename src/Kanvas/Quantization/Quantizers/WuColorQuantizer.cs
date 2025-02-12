@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kanvas.Quantization.ColorCaches;
 using Kanvas.Quantization.Models.Quantizer.Wu;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Quantization.Quantizers
 {
@@ -36,7 +37,7 @@ namespace Kanvas.Quantization.Quantizers
         }
 
         /// <inheritdoc />
-        public IList<Color> CreatePalette(IEnumerable<Color> colors)
+        public IList<Rgba32> CreatePalette(IEnumerable<Rgba32> colors)
         {
             Array.Clear(_colorCache.Tag, 0, _colorCache.Tag.Length);
 
@@ -51,13 +52,13 @@ namespace Kanvas.Quantization.Quantizers
         }
 
         /// <inheritdoc />
-        public IColorCache GetFixedColorCache(IList<Color> palette)
+        public IColorCache GetFixedColorCache(IList<Rgba32> palette)
         {
             _colorCache.SetPalette(palette);
             return _colorCache;
         }
 
-        private IEnumerable<Color> CreatePalette(WuColorCube cube)
+        private IEnumerable<Rgba32> CreatePalette(WuColorCube cube)
         {
             for (int k = 0; k < cube.ColorCount; k++)
             {
@@ -67,7 +68,7 @@ namespace Kanvas.Quantization.Quantizers
                 var weight = box.GetPartialVolume(5);
                 yield return weight == 0 ?
                     Color.Black :
-                    Color.FromArgb(
+                    new Rgba32(
                         (byte)(box.GetPartialVolume(4) / weight),
                         (byte)(box.GetPartialVolume(1) / weight),
                         (byte)(box.GetPartialVolume(2) / weight),

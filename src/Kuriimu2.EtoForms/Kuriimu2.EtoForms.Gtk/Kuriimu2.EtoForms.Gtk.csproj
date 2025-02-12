@@ -2,7 +2,7 @@
 	
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net7</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -1,22 +1,18 @@
-﻿using System;
+﻿using SixLabors.ImageSharp.PixelFormats;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Kanvas.Quantization.Models.ColorCache
 {
     class LshBucketInfo
     {
-        public SortedDictionary<int, Color> Colors;
+        public SortedDictionary<int, Rgba32> Colors;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LshBucketInfo"/> class.
         /// </summary>
         public LshBucketInfo()
         {
-            Colors = new SortedDictionary<int, Color>();
+            Colors = new SortedDictionary<int, Rgba32>();
         }
 
         /// <summary>
@@ -24,7 +20,7 @@ namespace Kanvas.Quantization.Models.ColorCache
         /// </summary>
         /// <param name="paletteIndex">Index of the palette.</param>
         /// <param name="color">The color.</param>
-        public void AddColor(int paletteIndex, Color color)
+        public void AddColor(int paletteIndex, Rgba32 color)
         {
             Colors.Add(paletteIndex, color);
         }

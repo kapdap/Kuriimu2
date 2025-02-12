@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Buffers.Binary;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using Kanvas;
 using Komponent.IO;
 using Komponent.IO.Streams;
 using Kompression.Implementations;
 using Kontract.Kanvas;
-using Kontract.Models.Image;
 using plugin_sting_entertainment.Archives;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_sting_entertainment.Images
 {
@@ -41,8 +41,8 @@ namespace plugin_sting_entertainment.Images
             switch (_magic = BinaryPrimitives.ReadUInt32BigEndian(buffer))
             {
                 case 0x89504E47:    // PNG
-                    var img = (Bitmap)Image.FromStream(imgData);
-                    image = new BitmapKanvasImage(img);
+                    var img = Image.Load<Rgba32>(imgData);
+                    image = new SharpKanvasImage(img);
 
                     break;
 
@@ -87,7 +87,7 @@ namespace plugin_sting_entertainment.Images
             switch (_magic)
             {
                 case 0x89504E47:    // PNG
-                    ((BitmapKanvasImage)image).GetImage().Save(imgData, ImageFormat.Png);
+                    ((SharpKanvasImage)image).GetImage().SaveAsPng(imgData);
                     break;
 
                 case 0x4C5A3737:    // LZ77

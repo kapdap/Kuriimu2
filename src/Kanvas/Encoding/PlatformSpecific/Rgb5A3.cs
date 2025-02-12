@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 using Kanvas.Encoding.Descriptors;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
 using Kontract.Models.IO;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Encoding.PlatformSpecific
 {
@@ -27,7 +26,7 @@ namespace Kanvas.Encoding.PlatformSpecific
             _byteOrder = byteOrder;
         }
 
-        public IEnumerable<Color> Load(byte[] input, EncodingLoadContext loadContext)
+        public IEnumerable<Rgba32> Load(byte[] input, EncodingLoadContext loadContext)
         {
             for (var i = 0; i < input.Length; i += 2)
             {
@@ -37,7 +36,7 @@ namespace Kanvas.Encoding.PlatformSpecific
             }
         }
 
-        public byte[] Save(IEnumerable<Color> colors, EncodingSaveContext saveContext)
+        public byte[] Save(IEnumerable<Rgba32> colors, EncodingSaveContext saveContext)
         {
             var buffer = new byte[saveContext.Size.Width * saveContext.Size.Height * 2];
 

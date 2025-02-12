@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Komponent.IO.Streams;
 using Kontract.Kompression.Model.PatternMatch;
 
@@ -17,7 +18,7 @@ namespace Kompression.Configuration.InputManipulation.Types
         {
             return new SubStream(input, _skip, input.Length - _skip)
             {
-                Position = input.Position - _skip
+                Position = Math.Max(0, input.Position - _skip)
             };
         }
 

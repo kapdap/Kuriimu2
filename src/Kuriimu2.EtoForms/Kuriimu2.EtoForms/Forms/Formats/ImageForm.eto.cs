@@ -8,7 +8,7 @@ using Kuriimu2.EtoForms.Support;
 
 namespace Kuriimu2.EtoForms.Forms.Formats
 {
-    partial class ImageForm:Panel
+    partial class ImageForm : Panel
     {
         #region Localization Keys
 
@@ -102,7 +102,7 @@ namespace Kuriimu2.EtoForms.Forms.Formats
             };
 
             imageView = new ImageViewEx { BackgroundColor = Themer.Instance.GetTheme().ImageViewBackColor };
-            imagePalette = new PaletteView { Size = new Size(200, -1),  };
+            imagePalette = new PaletteView { Size = new Size(200, -1), };
 
             var widthLabel = new Label { Text = Localize(WidthKey_) };
             var heightLabel = new Label { Text = Localize(HeightKey_) };
@@ -111,7 +111,7 @@ namespace Kuriimu2.EtoForms.Forms.Formats
 
             width = new Label();
             height = new Label();
-            formats = new ComboBox();
+            formats = new ComboBox { ItemKeyBinding = Binding.Property<string>("ImageIdent") };
             palettes = new ComboBox();
 
             #endregion

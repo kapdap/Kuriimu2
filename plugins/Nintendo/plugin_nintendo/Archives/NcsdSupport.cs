@@ -3,7 +3,7 @@
 
 namespace plugin_nintendo.Archives
 {
-    class NcsdHeader
+    struct NcsdHeader
     {
         [FixedLength(0x100)] 
         public byte[] rsa2048;
@@ -18,17 +18,17 @@ namespace plugin_nintendo.Archives
         [FixedLength(8)] 
         public NcsdPartitionEntry[] partitionEntries;
 
-        // This could also be a header for NAND, but we're only interested in card ridges
+        // This could also be a header for NAND, but we're only interested in card structures
         public NcsdCardHeader cardHeader;
     }
 
-    class NcsdPartitionEntry
+    struct NcsdPartitionEntry
     {
         public int offset;
         public int length;
     }
 
-    class NcsdCardHeader
+    struct NcsdCardHeader
     {
         [FixedLength(0x20)] 
         public byte[] exHeaderHash;
@@ -48,7 +48,7 @@ namespace plugin_nintendo.Archives
         public NcsdCardInfoHeader cardInfoHeader;
     }
 
-    class NcsdCardInfoHeader
+    struct NcsdCardInfoHeader
     {
         public int card2WriteAddress;   // in mediaUnits
         public int cardBitMask;

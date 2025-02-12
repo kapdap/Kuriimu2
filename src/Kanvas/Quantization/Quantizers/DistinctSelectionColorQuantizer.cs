@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kanvas.Quantization.Models.Quantizer.DistinctSelection;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Quantization.Quantizers
 {
@@ -30,7 +30,7 @@ namespace Kanvas.Quantization.Quantizers
         }
 
         /// <inheritdoc />
-        public IList<Color> CreatePalette(IEnumerable<Color> colors)
+        public IList<Rgba32> CreatePalette(IEnumerable<Rgba32> colors)
         {
             // Step 1: Filter out distinct colors
             var distinctColors = FillDistinctColors(colors.ToArray());
@@ -44,12 +44,12 @@ namespace Kanvas.Quantization.Quantizers
         }
 
         /// <inheritdoc />
-        public IColorCache GetFixedColorCache(IList<Color> palette)
+        public IColorCache GetFixedColorCache(IList<Rgba32> palette)
         {
             throw new NotSupportedException();
         }
 
-        private IDictionary<uint, DistinctColorInfo> FillDistinctColors(IList<Color> colors)
+        private IDictionary<uint, DistinctColorInfo> FillDistinctColors(IList<Rgba32> colors)
         {
             var distinctColors = new ConcurrentDictionary<uint, DistinctColorInfo>();
 
@@ -60,22 +60,22 @@ namespace Kanvas.Quantization.Quantizers
             return distinctColors;
         }
 
-        private void AddOrUpdateDistinctColors(ConcurrentDictionary<uint, DistinctColorInfo> distinctColors, Color color)
+        private void AddOrUpdateDistinctColors(ConcurrentDictionary<uint, DistinctColorInfo> distinctColors, Rgba32 color)
         {
-            distinctColors.AddOrUpdate((uint)color.ToArgb(),
+            distinctColors.AddOrUpdate(color.PackedValue,
                 key => new DistinctColorInfo(color),
                 (key, info) => info.IncreaseCount());
         }
 
         // TODO: Review method
-        private List<Color> FilterColorInfos(IDictionary<uint, DistinctColorInfo> distinctColors)
+        private List<Rgba32> FilterColorInfos(IDictionary<uint, DistinctColorInfo> distinctColors)
         {
             var colorInfoList = distinctColors.Values.ToList();
             var foundColorCount = colorInfoList.Count;
             var maxColorCount = _colorCount;
 
             if (foundColorCount < maxColorCount)
-                return colorInfoList.Select(info => Color.FromArgb(info.Color)).ToList();
+                return colorInfoList.Select(info => new Rgba32(info.Color)).ToList();
 
             var random = new FastRandom(13);
             colorInfoList = colorInfoList.
@@ -107,11 +107,11 @@ namespace Kanvas.Quantization.Quantizers
                 colorInfoList = colorInfoList.Take(allowedTake).ToList();
             }
 
-            var palette = new List<Color>
+            var palette = new List<Rgba32>
             {
-                Color.FromArgb(background.Color)
+                new(background.Color)
             };
-            palette.AddRange(colorInfoList.Select(colorInfo => Color.FromArgb(colorInfo.Color)));
+            palette.AddRange(colorInfoList.Select(colorInfo => new Rgba32(colorInfo.Color)));
 
             return palette;
         }

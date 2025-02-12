@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using Komponent.IO;
 using Komponent.IO.Streams;
@@ -8,6 +7,7 @@ using Kontract.Interfaces.Managers;
 using Kontract.Interfaces.Plugins.State;
 using Kontract.Kanvas;
 using Kontract.Models;
+using SixLabors.ImageSharp;
 
 namespace plugin_bandai_namco.Images
 {

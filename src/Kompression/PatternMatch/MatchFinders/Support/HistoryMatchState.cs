@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Kontract.Kompression.Model;
 using Kontract.Kompression.Model.PatternMatch;
@@ -125,7 +126,7 @@ namespace Kompression.PatternMatch.MatchFinders.Support
             _offsetTable = Enumerable.Repeat(-1, input.Length).ToArray();
             var valueTable = Enumerable.Repeat(-1, (int)Math.Pow(256, _valueLength)).ToArray();
 
-            for (var i = 0; i < input.Length - _valueLength; i += _unitSize)
+            for (var i = 0; i <= input.Length - _valueLength; i += _unitSize)
             {
                 var value = _readValue(input, i);
 

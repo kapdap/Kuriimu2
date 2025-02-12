@@ -29,6 +29,8 @@ namespace Kompression.Implementations.Encoders.Headerless
         public void Encode(Stream input, Stream output, IHuffmanTreeBuilder treeBuilder)
         {
             var rootNode = treeBuilder.Build(input.ToArray(), _bitDepth, _nibbleOrder);
+            if (rootNode == null)
+                return;
 
             // For a more even distribution of the children over the branches, we'll label the tree nodes
             var labelList = LabelTreeNodes(rootNode);

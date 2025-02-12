@@ -1,11 +1,11 @@
-﻿using System.Drawing;
+﻿using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Kanvas
 {
     public interface IColorShader
     {
-        Color Read(Color c);
+        Rgba32 Read(Rgba32 c);
 
-        Color Write(Color c);
+        Rgba32 Write(Rgba32 c);
     }
 }

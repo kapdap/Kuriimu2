@@ -39,8 +39,8 @@ namespace Kompression.Huffman
 
             // Split input into elements of bitDepth size
             IEnumerable<byte> data = input;
-            if (bitDepth == 4) data = byteOrder == NibbleOrder.LowNibbleFirst ? 
-                input.SelectMany(b => new[] { (byte)(b % 16), (byte)(b / 16) }) : 
+            if (bitDepth == 4) data = byteOrder == NibbleOrder.LowNibbleFirst ?
+                input.SelectMany(b => new[] { (byte)(b % 16), (byte)(b / 16) }) :
                 input.SelectMany(b => new[] { (byte)(b / 16), (byte)(b % 16) });
 
             // Group elements by value
@@ -56,7 +56,10 @@ namespace Kompression.Huffman
 
         private HuffmanTreeNode CreateAndSortTree(List<HuffmanTreeNode> frequencies)
         {
-            //Sort and create the tree
+            if (frequencies.Count <= 0)
+                return null;
+
+            // Sort and create the tree
             while (frequencies.Count > 1)
             {
                 // Order frequencies ascending

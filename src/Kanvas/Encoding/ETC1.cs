@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kanvas.Encoding.Base;
 using Kanvas.Encoding.BlockCompressions;
 using Kanvas.Encoding.BlockCompressions.ETC1.Models;
 using Komponent.IO;
 using Kontract.Models.IO;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Encoding
 {
@@ -67,12 +67,12 @@ namespace Kanvas.Encoding
             bw.Write(block.Block.GetBlockData());
         }
 
-        protected override IList<Color> DecodeNextBlock(Etc1PixelData block)
+        protected override IList<Rgba32> DecodeNextBlock(Etc1PixelData block)
         {
             return _transcoder.DecodeBlocks(block).ToArray();
         }
 
-        protected override Etc1PixelData EncodeNextBlock(IList<Color> colors)
+        protected override Etc1PixelData EncodeNextBlock(IList<Rgba32> colors)
         {
             return _transcoder.EncodeColors(colors);
         }

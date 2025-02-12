@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using SixLabors.ImageSharp.PixelFormats;
+using System.Collections.Generic;
 
 namespace Kanvas.Quantization.Models.Ditherer
 {
     class ErrorDiffusionElement
     {
-        private readonly IList<Color> _colors;
+        private readonly IList<Rgba32> _colors;
         private readonly int _colorIndex;
 
-        public Color Color => _colors[_colorIndex];
+        public Rgba32 Color => _colors[_colorIndex];
 
         public IDictionary<int, ColorComponentError> Errors { get; }
 
         public IList<int> Indices { get; }
 
-        public ErrorDiffusionElement(IList<Color> colors, int colorIndex, IDictionary<int, ColorComponentError> errors, IList<int> indices)
+        public ErrorDiffusionElement(IList<Rgba32> colors, int colorIndex, IDictionary<int, ColorComponentError> errors, IList<int> indices)
         {
             _colors = colors;
             _colorIndex = colorIndex;

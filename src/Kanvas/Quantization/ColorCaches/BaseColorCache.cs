@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using Kontract;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Quantization.ColorCaches
 {
     public abstract class BaseColorCache : IColorCache
     {
         /// <inheritdoc />
-        public IList<Color> Palette { get; }
+        public IList<Rgba32> Palette { get; }
 
-        public BaseColorCache(IList<Color> palette)
+        public BaseColorCache(IList<Rgba32> palette)
         {
             ContractAssertions.IsNotNull(palette,nameof(palette));
 
@@ -18,6 +18,6 @@ namespace Kanvas.Quantization.ColorCaches
         }
 
         /// <inheritdoc />
-        public abstract int GetPaletteIndex(Color color);
+        public abstract int GetPaletteIndex(Rgba32 color);
     }
 }

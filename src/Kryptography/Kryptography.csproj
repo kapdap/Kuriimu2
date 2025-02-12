@@ -1,16 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Version>2.0.9</Version>
 
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageOutputPath>..\..\nuget</PackageOutputPath>
 
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageId>Kryptography</PackageId>
-    <PackageVersion>2.0.9</PackageVersion>
+    <PackageVersion>2.0.11</PackageVersion>
     <Authors>onepiecefreak</Authors>
     <Company>Fan Translators International</Company>
     <Product>Kryptography</Product>
@@ -25,7 +24,7 @@
 
   <PropertyGroup>
     <SelfContained>false</SelfContained>
-    <PublishSingleFile>True</PublishSingleFile>
+    <PublishSingleFile>true</PublishSingleFile>
     <PublishReadyToRun>False</PublishReadyToRun>
   </PropertyGroup>
 

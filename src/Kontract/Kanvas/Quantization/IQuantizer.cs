@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using Kontract.Interfaces.Progress;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp;
 
 namespace Kontract.Kanvas.Quantization
 {
     public interface IQuantizer
     {
-        Image ProcessImage(Bitmap image, IProgressContext progress = null);
+        Image<Rgba32> ProcessImage(Image<Rgba32> image, IProgressContext progress = null);
 
-        (IEnumerable<int>, IList<Color>) Process(IEnumerable<Color> colors, Size imageSize, IProgressContext progress = null);
+        (IEnumerable<int>, IList<Rgba32>) Process(IEnumerable<Rgba32> colors, Size imageSize, IProgressContext progress = null);
     }
 }

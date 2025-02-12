@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Kanvas;
 using Kontract.Interfaces.FileSystem;
 using Kontract.Interfaces.Managers;
 using Kontract.Interfaces.Plugins.State;
@@ -15,6 +13,7 @@ using Kontract.Models.Context;
 using Kontract.Models.Font;
 using Kontract.Models.IO;
 using plugin_level5._3DS.Archives;
+using SixLabors.ImageSharp;
 
 namespace plugin_level5._3DS.Fonts
 {
@@ -75,7 +74,7 @@ namespace plugin_level5._3DS.Fonts
             var (fontStream, fontImage) = _xf.Save(_characters, imageState.Images[0].ImageSize);
 
             // Save image
-            imageState.Images[0].SetImage((Bitmap)fontImage);
+            imageState.Images[0].SetImage(fontImage);
 
             var saveResult = await _pluginManager.SaveStream(_imageStateInfo);
             if (!saveResult.IsSuccessful)

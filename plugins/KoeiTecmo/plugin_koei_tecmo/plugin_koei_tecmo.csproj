@@ -2,9 +2,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp31</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <LangVersion>8</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -14,11 +13,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\..\dist\Debug\netcoreapp31\plugins</OutputPath>
+    <OutputPath>..\..\..\dist\Debug\net8.0\plugins</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\..\dist\Release\netcoreapp31\plugins</OutputPath>
+    <OutputPath>..\..\..\dist\Release\net8.0\plugins</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,19 +27,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Archives\X3.cs~RF3c3896f9.TMP" />
+    <PackageReference Include="Kanvas" Version="2.0.11" />
+    <PackageReference Include="Komponent" Version="2.0.11" />
+    <PackageReference Include="Kompression" Version="2.0.11" />
+    <PackageReference Include="Kontract" Version="2.0.11" />
+    <PackageReference Include="Kryptography" Version="2.0.11" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Kanvas" Version="2.0.8" />
-    <PackageReference Include="Komponent" Version="2.0.8" />
-    <PackageReference Include="Kompression" Version="2.0.8" />
-    <PackageReference Include="Kontract" Version="2.0.8" />
-    <PackageReference Include="Kryptography" Version="2.0.8" />
-  </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp31'">
-    <DefineConstants>NET_CORE_31</DefineConstants>
-  </PropertyGroup>
 
 </Project>

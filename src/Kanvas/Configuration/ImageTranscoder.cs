@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kontract;
 using Kontract.Extensions;
@@ -9,7 +8,8 @@ using Kontract.Kanvas;
 using Kontract.Kanvas.Configuration;
 using Kontract.Kanvas.Model;
 using Kontract.Kanvas.Quantization;
-using Kontract.Models.Image;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Configuration
 {
@@ -98,10 +98,10 @@ namespace Kanvas.Configuration
 
         #region Decode methods
 
-        public Bitmap Decode(byte[] data, Size imageSize, IProgressContext progress = null) =>
+        public Image<Rgba32> Decode(byte[] data, Size imageSize, IProgressContext progress = null) =>
             Decode(data, null, imageSize, progress);
 
-        public Bitmap Decode(byte[] data, byte[] paletteData, Size imageSize, IProgressContext progress = null)
+        public Image<Rgba32> Decode(byte[] data, byte[] paletteData, Size imageSize, IProgressContext progress = null)
         {
             if (IsIndexed && paletteData == null)
                 throw new ArgumentNullException(nameof(paletteData));
@@ -111,7 +111,7 @@ namespace Kanvas.Configuration
                 DecodeColorInternal(data, imageSize, progress);
         }
 
-        private Bitmap DecodeColorInternal(byte[] data, Size imageSize, IProgressContext progress)
+        private Image<Rgba32> DecodeColorInternal(byte[] data, Size imageSize, IProgressContext progress)
         {
             // Prepare information and instances
             var paddedSize = GetPaddedSize(imageSize);
@@ -139,10 +139,10 @@ namespace Kanvas.Configuration
                 colors = colors.Select(colorShader.Read);
 
             // Create image with unpadded dimensions
-            return colors.ToBitmap(imageSize, paddedSize, swizzle, _anchor);
+            return colors.ToImage(imageSize, paddedSize, swizzle, _anchor);
         }
 
-        private Bitmap DecodeIndexInternal(byte[] data, byte[] paletteData, Size imageSize, IProgressContext progress)
+        private Image<Rgba32> DecodeIndexInternal(byte[] data, byte[] paletteData, Size imageSize, IProgressContext progress)
         {
             ContractAssertions.IsTrue(IsIndexed, nameof(IsIndexed));
 
@@ -171,21 +171,21 @@ namespace Kanvas.Configuration
                 .Load(data, palette, new EncodingLoadContext(finalSize, _taskCount))
                 .AttachProgress(setMaxProgress, "Decode colors");
 
-            return colors.ToBitmap(imageSize, paddedSize, swizzle, _anchor);
+            return colors.ToImage(imageSize, paddedSize, swizzle, _anchor);
         }
 
         #endregion
 
         #region Encode methods
 
-        public (byte[] imageData, byte[] paletteData) Encode(Bitmap image, IProgressContext progress = null)
+        public (byte[] imageData, byte[] paletteData) Encode(Image<Rgba32> image, IProgressContext progress = null)
         {
             return IsIndexed ?
                 EncodeIndexInternal(image, progress) :
                 (EncodeColorInternal(image, progress), null);
         }
 
-        private byte[] EncodeColorInternal(Bitmap image, IProgressContext progress = null)
+        private byte[] EncodeColorInternal(Image<Rgba32> image, IProgressContext progress = null)
         {
             // Prepare information and instances
             var paddedSize = GetPaddedSize(image.Size);
@@ -194,7 +194,7 @@ namespace Kanvas.Configuration
             var colorShader = _shadeColorsFunc?.Invoke();
 
             // If we have quantization enabled
-            IEnumerable<Color> colors;
+            IEnumerable<Rgba32> colors;
             if (_quantizer != null)
             {
                 var scopedProgresses = progress?.SplitIntoEvenScopes(2);
@@ -221,7 +221,7 @@ namespace Kanvas.Configuration
             return _colorEncoding.Save(colors, new EncodingSaveContext(finalSize, _taskCount));
         }
 
-        private (byte[] indexData, byte[] paletteData) EncodeIndexInternal(Bitmap image, IProgressContext progress = null)
+        private (byte[] indexData, byte[] paletteData) EncodeIndexInternal(Image<Rgba32> image, IProgressContext progress = null)
         {
             // Prepare information and instances
             var paddedSize = GetPaddedSize(image.Size);
@@ -243,7 +243,7 @@ namespace Kanvas.Configuration
 
         #endregion
 
-        private (IEnumerable<int> indices, IList<Color> palette) QuantizeImage(Bitmap image, Size paddedSize, IImageSwizzle swizzle, IProgressContext progress = null)
+        private (IEnumerable<int> indices, IList<Rgba32> palette) QuantizeImage(Image<Rgba32> image, Size paddedSize, IImageSwizzle swizzle, IProgressContext progress = null)
         {
             var finalSize = GetFinalSize(paddedSize, swizzle);
             var colorShader = _shadeColorsFunc?.Invoke();

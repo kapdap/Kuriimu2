@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Kanvas.Configuration;
 using Kanvas.Swizzle;
 using Komponent.IO;
 using Komponent.IO.Streams;

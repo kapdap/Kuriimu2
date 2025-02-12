@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Eto.Drawing;
 using Eto.Forms;
+using SixLabors.ImageSharp;
 using Kontract.Extensions;
 using Kontract.Interfaces.Plugins.State;
 using Kontract.Kanvas;
@@ -13,7 +14,7 @@ using Kuriimu2.EtoForms.Extensions;
 using Kuriimu2.EtoForms.Forms.Interfaces;
 using Kuriimu2.EtoForms.Forms.Models;
 using Kuriimu2.EtoForms.Resources;
-using ImageFormat = System.Drawing.Imaging.ImageFormat;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kuriimu2.EtoForms.Forms.Formats
 {
@@ -226,8 +227,8 @@ namespace Kuriimu2.EtoForms.Forms.Formats
             formats.SelectedValueChanged -= Formats_SelectedValueChanged;
             palettes.SelectedValueChanged -= Palettes_SelectedValueChanged;
 
-            formats.SelectedValue = _currentFormats.FirstOrDefault(x => x.ImageIdent == GetSelectedImage().ImageFormat);
-            palettes.SelectedValue = _currentPaletteFormats.FirstOrDefault(x => x.ImageIdent == GetSelectedImage().PaletteFormat);
+            formats.SelectedValue = formats.DataStore.FirstOrDefault(imgItem => ((ImageEncodingElement)imgItem).ImageIdent == GetSelectedImage().ImageFormat);
+            palettes.SelectedValue = palettes.DataStore.FirstOrDefault(imgItem => ((ImageEncodingElement)imgItem).ImageIdent == GetSelectedImage().PaletteFormat);
 
             formats.SelectedValueChanged += Formats_SelectedValueChanged;
             palettes.SelectedValueChanged += Palettes_SelectedValueChanged;
@@ -316,7 +317,7 @@ namespace Kuriimu2.EtoForms.Forms.Formats
             if (sfd.ShowDialog(this) != DialogResult.Ok)
                 return;
 
-            selectedImage.GetImage(_formInfo.Progress).Save(sfd.FileName, ImageFormat.Png);
+            selectedImage.GetImage(_formInfo.Progress).SaveAsPng(sfd.FileName);
         }
 
         #endregion
@@ -344,7 +345,7 @@ namespace Kuriimu2.EtoForms.Forms.Formats
 
             try
             {
-                var newImage = new System.Drawing.Bitmap(filePath.FullName);
+                var newImage = SixLabors.ImageSharp.Image.Load<Rgba32>(filePath.FullName);
                 await _asyncOperation.StartAsync(cts => GetSelectedImage().SetImage(newImage, _formInfo.Progress));
             }
             catch (Exception ex)
@@ -431,7 +432,7 @@ namespace Kuriimu2.EtoForms.Forms.Formats
             }
 
             var c = clrDialog.Color;
-            e.Result = System.Drawing.Color.FromArgb(c.Ab, c.Rb, c.Gb, c.Bb);
+            e.Result = new Rgba32(c.Rb, c.Gb, c.Bb, c.Ab);
         }
 
         private async void ImagePalette_PaletteChanged(object sender, Controls.PaletteChangedEventArgs e)
@@ -504,7 +505,7 @@ namespace Kuriimu2.EtoForms.Forms.Formats
             return imageList.SelectedIndex;
         }
 
-        private Bitmap GenerateThumbnail(Image input)
+        private Bitmap GenerateThumbnail(Eto.Drawing.Image input)
         {
             var thumbWidth = Settings.Default.ThumbnailWidth;
             var thumbHeight = Settings.Default.ThumbnailHeight;
@@ -522,8 +523,8 @@ namespace Kuriimu2.EtoForms.Forms.Formats
             if (input.Width <= thumbWidth && input.Height <= thumbHeight)
                 ratio = 1.0f;
 
-            var size = new Size((int)Math.Min(input.Width / ratio, thumbWidth), (int)Math.Min(input.Height / ratio, thumbHeight));
-            var pos = new Point(thumbWidth / 2 - size.Width / 2, thumbHeight / 2 - size.Height / 2);
+            var size = new Eto.Drawing.Size((int)Math.Min(input.Width / ratio, thumbWidth), (int)Math.Min(input.Height / ratio, thumbHeight));
+            var pos = new Eto.Drawing.Point(thumbWidth / 2 - size.Width / 2, thumbHeight / 2 - size.Height / 2);
 
             gfx.DrawImage(input, pos.X, pos.Y, size.Width, size.Height);
 
@@ -534,7 +535,7 @@ namespace Kuriimu2.EtoForms.Forms.Formats
 
         #region KanvasImage
 
-        private async Task SetColorInPalette(int index, System.Drawing.Color newColor)
+        private async Task SetColorInPalette(int index, Rgba32 newColor)
         {
             if (_asyncOperation.IsRunning)
                 return;

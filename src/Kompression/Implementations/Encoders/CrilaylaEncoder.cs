@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Komponent.IO;
 using Komponent.IO.Streams;
-using Kompression.Implementations.Decoders;
 using Kompression.Implementations.PriceCalculators;
 using Kontract.Kompression.Configuration;
 using Kontract.Kompression.Model.PatternMatch;
@@ -72,12 +71,11 @@ namespace Kompression.Implementations.Encoders
 
             // Write header
             using var outputBw = new BinaryWriterX(output, true);
+
             output.Position = 0;
-            outputBw.WriteType(new CrilaylaHeader
-            {
-                decompSize = (int)(input.Length - SkipSize_),
-                compSize = (int)(output.Length - 0x10 - SkipSize_)
-            });
+            outputBw.WriteString("CRILAYLA", Encoding.ASCII, false, false);
+            outputBw.Write((int)(input.Length - SkipSize_));
+            outputBw.Write((int)(output.Length - 0x10 - SkipSize_));
         }
 
         private long CalculateCompressedLength(long inputLength, Match[] matches)

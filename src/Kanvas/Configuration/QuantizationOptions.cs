@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kanvas.Quantization.ColorCaches;
 using Kanvas.Quantization.Quantizers;
@@ -9,6 +8,8 @@ using Kontract.Extensions;
 using Kontract.Interfaces.Progress;
 using Kontract.Kanvas.Configuration;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Configuration
 {
@@ -79,14 +80,14 @@ namespace Kanvas.Configuration
             return this;
         }
 
-        public Image ProcessImage(Bitmap image, IProgressContext progress = null)
+        public Image<Rgba32> ProcessImage(Image<Rgba32> image, IProgressContext progress = null)
         {
             var (indices, palette) = Process(image.ToColors(), image.Size, progress);
 
-            return indices.ToColors(palette).ToBitmap(image.Size);
+            return indices.ToColors(palette).ToImage(image.Size);
         }
 
-        public (IEnumerable<int>, IList<Color>) Process(IEnumerable<Color> colors, Size imageSize,
+        public (IEnumerable<int>, IList<Rgba32>) Process(IEnumerable<Rgba32> colors, Size imageSize,
             IProgressContext progress = null)
         {
             var colorList = colors.ToList();
@@ -103,7 +104,7 @@ namespace Kanvas.Configuration
             return (indices.AttachProgress(setMaxProgress, "Encode indices"), colorCache.Palette);
         }
 
-        private IColorCache GetColorCache(IEnumerable<Color> colors, int taskCount)
+        private IColorCache GetColorCache(IEnumerable<Rgba32> colors, int taskCount)
         {
             // Create a palette for the input colors
             if (_paletteFunc != null)

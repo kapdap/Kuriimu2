@@ -1,4 +1,7 @@
-﻿using System.Drawing;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Kontract.Models.Layout
 {
@@ -14,10 +17,11 @@ namespace Kontract.Models.Layout
             RelativeLocation = location;
         }
 
-        public virtual void Draw(Graphics gr, bool drawBorder)
+        public virtual void Draw(Image<Rgba32> img, bool drawBorder)
         {
             if (drawBorder)
-                gr.DrawRectangle(new Pen(Brushes.Black, 2), new Rectangle(GetAbsoluteLocation(), Size));
+                img.Mutate(i => i.Draw(new SolidPen(Color.Black, 2), new RectangleF(GetAbsoluteLocation(), Size)));
+
         }
 
         public abstract Point GetAbsoluteLocation();

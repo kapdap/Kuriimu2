@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Komponent.Font
 {
@@ -45,14 +49,13 @@ namespace Komponent.Font
                     break;
 
                 // Create new font texture to draw on.
-                var fontTexture = new Bitmap(CanvasSize.Width, CanvasSize.Height);
-                var fontGraphics = Graphics.FromImage(fontTexture);
+                var fontTexture = new Image<Rgba32>(CanvasSize.Width, CanvasSize.Height);
 
                 // Draw each positioned glyph on the font texture
                 var handledGlyphs = new List<(AdjustedGlyph, Point)>(remainingAdjustedGlyphs.Count);
                 foreach (var positionedGlyph in _binPacker.Pack(remainingAdjustedGlyphs))
                 {
-                    DrawGlyph(fontGraphics, positionedGlyph);
+                    DrawGlyph(fontTexture, positionedGlyph);
                     handledGlyphs.Add(positionedGlyph);
                 }
 
@@ -68,28 +71,21 @@ namespace Komponent.Font
         /// <summary>
         /// Draws a glpyh onto the font texture.
         /// </summary>
-        /// <param name="fontGraphics">The font texture to draw on.</param>
+        /// <param name="fontImage">The font texture to draw on.</param>
         /// <param name="positionedGlyph">The adjusted glyph positioned in relation to the texture.</param>
-        private void DrawGlyph(Graphics fontGraphics, (AdjustedGlyph adjustedGlyph, Point position) positionedGlyph)
+        private void DrawGlyph(Image<Rgba32> fontImage, (AdjustedGlyph adjustedGlyph, Point position) positionedGlyph)
         {
-            var adjustedGlyph = positionedGlyph.adjustedGlyph;
-            var destPoints = new[]
-            {
-                new PointF(positionedGlyph.position.X, positionedGlyph.position.Y),
-                new PointF(
-                    positionedGlyph.position.X +
-                    (adjustedGlyph.WhiteSpaceAdjustment?.GlyphSize.Width ?? adjustedGlyph.Glyph.Width),
-                    positionedGlyph.position.Y),
-                new PointF(positionedGlyph.position.X,
-                    positionedGlyph.position.Y +
-                    (adjustedGlyph.WhiteSpaceAdjustment?.GlyphSize.Height ?? adjustedGlyph.Glyph.Height)),
-            };
+            AdjustedGlyph adjustedGlyph = positionedGlyph.adjustedGlyph;
 
-            var sourceRect = new RectangleF(
+            var destRect = new Rectangle(
+                positionedGlyph.position,
+                adjustedGlyph.WhiteSpaceAdjustment?.GlyphSize ?? adjustedGlyph.Glyph.Size);
+
+            var sourceRect = new Rectangle(
                 adjustedGlyph.WhiteSpaceAdjustment?.GlyphPosition ?? Point.Empty,
                 adjustedGlyph.WhiteSpaceAdjustment?.GlyphSize ?? adjustedGlyph.Glyph.Size);
 
-            fontGraphics.DrawImage(adjustedGlyph.Glyph, destPoints, sourceRect, GraphicsUnit.Pixel);
+            fontImage.Mutate(i => i.Clip(new RectangularPolygon(destRect), context => context.DrawImage(adjustedGlyph.Glyph, sourceRect, 1f)));
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kanvas;
 using Kanvas.Encoding;
@@ -11,7 +10,7 @@ using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
 using Kontract.Models.Dialog;
 using Kontract.Models.Image;
-#pragma warning disable 649
+using SixLabors.ImageSharp;
 
 namespace plugin_level5.General
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using Kontract.Kanvas.Model;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Kanvas
 {
@@ -21,7 +21,7 @@ namespace Kontract.Kanvas
         /// <param name="palette">The palette for the input.</param>
         /// <param name="loadContext">The context for the load operation.</param>
         /// <returns>Decoded list of colors.</returns>
-        IEnumerable<Color> Load(byte[] input, IList<Color> palette, EncodingLoadContext loadContext);
+        IEnumerable<Rgba32> Load(byte[] input, IList<Rgba32> palette, EncodingLoadContext loadContext);
 
         /// <summary>
         /// Encodes a list of colors.
@@ -30,6 +30,6 @@ namespace Kontract.Kanvas
         /// <param name="palette">The palette for the input.</param>
         /// <param name="saveContext">The context for the save operation.</param>
         /// <returns>Encoded data and palette.</returns>
-        byte[] Save(IEnumerable<int> indices, IList<Color> palette, EncodingSaveContext saveContext);
+        byte[] Save(IEnumerable<int> indices, IList<Rgba32> palette, EncodingSaveContext saveContext);
     }
 }

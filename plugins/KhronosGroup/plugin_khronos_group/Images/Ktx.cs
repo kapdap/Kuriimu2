@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using BCnEncoder.Shared;
 using BCnEncoder.Shared.ImageFiles;
-using Kontract.Models.Image;
+using SixLabors.ImageSharp;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_khronos_group.Images
 {

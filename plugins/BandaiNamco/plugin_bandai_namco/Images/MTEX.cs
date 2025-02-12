@@ -1,11 +1,10 @@
-﻿using System.Drawing;
-using System.IO;
-using Kanvas.Configuration;
+﻿using System.IO;
 using Kanvas.Swizzle;
 using Kanvas.Swizzle.Models;
 using Komponent.IO;
 using Kontract.Kanvas;
-using Kontract.Models.Image;
+using SixLabors.ImageSharp;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_bandai_namco.Images
 {

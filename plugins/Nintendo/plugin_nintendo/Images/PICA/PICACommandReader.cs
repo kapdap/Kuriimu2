@@ -1,10 +1,9 @@
-﻿using System;
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Text;
 using Komponent.IO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace plugin_nintendo.Images.PICA
 {
@@ -324,13 +323,13 @@ namespace plugin_nintendo.Images.PICA
         ///     Gets the Fragment Buffer Color.
         /// </summary>
         /// <returns></returns>
-        public Color getFragmentBufferColor()
+        public Rgba32 getFragmentBufferColor()
         {
             uint rgba = GetParameter(PICACommand.fragmentBufferColor);
-            return Color.FromArgb((byte)(rgba >> 24),
-                (byte)(rgba & 0xff),
+            return new Rgba32((byte)(rgba & 0xff),
                 (byte)((rgba >> 8) & 0xff),
-                (byte)((rgba >> 16) & 0xff));
+                (byte)((rgba >> 16) & 0xff),
+                (byte)(rgba >> 24));
         }
 
         /// <summary>
@@ -527,13 +526,13 @@ namespace plugin_nintendo.Images.PICA
         ///     when the wrapping mode is set to Border.
         /// </summary>
         /// <returns></returns>
-        public Color getTexUnit0BorderColor()
+        public Rgba32 getTexUnit0BorderColor()
         {
             uint rgba = GetParameter(PICACommand.texUnit0BorderColor);
-            return Color.FromArgb((byte)(rgba >> 24),
-                (byte)(rgba & 0xff),
+            return new Rgba32((byte)(rgba & 0xff),
                 (byte)((rgba >> 8) & 0xff),
-                (byte)((rgba >> 16) & 0xff));
+                (byte)((rgba >> 16) & 0xff),
+                (byte)(rgba >> 24));
         }
 
         /// <summary>
@@ -594,13 +593,13 @@ namespace plugin_nintendo.Images.PICA
         ///     when the wrapping mode is set to Border.
         /// </summary>
         /// <returns></returns>
-        public Color getTexUnit1BorderColor()
+        public Rgba32 getTexUnit1BorderColor()
         {
             uint rgba = GetParameter(PICACommand.texUnit1BorderColor);
-            return Color.FromArgb((byte)(rgba >> 24),
-                (byte)(rgba & 0xff),
+            return new Rgba32((byte)(rgba & 0xff),
                 (byte)((rgba >> 8) & 0xff),
-                (byte)((rgba >> 16) & 0xff));
+                (byte)((rgba >> 16) & 0xff),
+                (byte)(rgba >> 24));
         }
 
         /// <summary>
@@ -661,14 +660,14 @@ namespace plugin_nintendo.Images.PICA
         ///     when the wrapping mode is set to Border.
         /// </summary>
         /// <returns></returns>
-        public Color getTexUnit2BorderColor()
+        public Rgba32 getTexUnit2BorderColor()
         {
             uint rgba = GetParameter(PICACommand.texUnit2BorderColor);
-            return Color.FromArgb(
-                (byte)(rgba >> 24),
+            return new Rgba32(
                 (byte)(rgba & 0xff),
                 (byte)((rgba >> 8) & 0xff),
-                (byte)((rgba >> 16) & 0xff));
+                (byte)((rgba >> 16) & 0xff),
+                (byte)(rgba >> 24));
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
-﻿using System.Drawing;
-using Kontract.Models.Font;
+﻿using Kontract.Models.Font;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Interfaces.Plugins.State.Font
 {
@@ -35,11 +36,11 @@ namespace Kontract.Interfaces.Plugins.State.Font
         /// 
         /// </summary>
         /// <param name="c"></param>
-        /// <param name="gfx"></param>
+        /// <param name="image"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="scaleX"></param>
         /// <param name="scaleY"></param>
-        void Draw(char c, Graphics gfx, float x, float y, float scaleX, float scaleY);
+        void Draw(char c, Image<Rgba32> image, float x, float y, float scaleX, float scaleY);
     }
 }

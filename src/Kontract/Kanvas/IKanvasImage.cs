@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using Kontract.Interfaces.Progress;
 using Kontract.Models.Image;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kontract.Kanvas
 {
@@ -25,7 +26,7 @@ namespace Kontract.Kanvas
         /// The image information provided by an image plugin.
         /// </summary>
         /// <remarks>This instance may not be changed manually.</remarks>
-        ImageInfo ImageInfo { get; }
+        Models.Image.ImageInfo ImageInfo { get; }
 
         /// <summary>
         /// If the image is encoded with an <see cref="IIndexEncoding"/>.
@@ -67,14 +68,14 @@ namespace Kontract.Kanvas
         /// </summary>
         /// <param name="progress">The progress for this action.</param>
         /// <returns>The decoded image.</returns>
-        Bitmap GetImage(IProgressContext progress = null);
+        Image<Rgba32> GetImage(IProgressContext progress = null);
 
         /// <summary>
         /// Sets the image of the set <see cref="ImageInfo"/>.
         /// </summary>
         /// <param name="image">The image to encode and set.</param>
         /// <param name="progress">The progress for this action.</param>
-        void SetImage(Bitmap image, IProgressContext progress = null);
+        void SetImage(Image<Rgba32> image, IProgressContext progress = null);
 
         /// <summary>
         /// Change the image's color encoding.
@@ -88,23 +89,23 @@ namespace Kontract.Kanvas
         /// </summary>
         /// <param name="progress">The progress for this action.</param>
         /// <returns>The decoded palette.</returns>
-        /// <remarks>Throws if the image is encoded with an <see cref="IColorIndexEncoding"/>.</remarks>
-        IList<Color> GetPalette(IProgressContext progress = null);
+        /// <remarks>Throws if the image is encoded with an <see cref="IIndexEncoding"/>.</remarks>
+        IList<Rgba32> GetPalette(IProgressContext progress = null);
 
         /// <summary>
         /// Sets the palette of the set <see cref="ImageInfo"/>.
         /// </summary>
         /// <param name="palette">The palette to encode and set.</param>
         /// <param name="progress">The progress for this action.</param>
-        /// <remarks>Throws if the image is encoded with an <see cref="IColorIndexEncoding"/>.</remarks>
-        void SetPalette(IList<Color> palette, IProgressContext progress = null);
+        /// <remarks>Throws if the image is encoded with an <see cref="IIndexEncoding"/>.</remarks>
+        void SetPalette(IList<Rgba32> palette, IProgressContext progress = null);
 
         /// <summary>
         /// Change the palette's color encoding.
         /// </summary>
         /// <param name="paletteFormat">The new palette format.</param>
         /// <param name="progress">The progress for this action.</param>
-        /// <remarks>Throws if the image is encoded with an <see cref="IColorIndexEncoding"/>.</remarks>
+        /// <remarks>Throws if the image is encoded with an <see cref="IIndexEncoding"/>.</remarks>
         void TranscodePalette(int paletteFormat, IProgressContext progress = null);
 
         /// <summary>
@@ -112,15 +113,15 @@ namespace Kontract.Kanvas
         /// </summary>
         /// <param name="paletteIndex">The index into the palette.</param>
         /// <param name="color">The new color at the given index.</param>
-        /// <remarks>Throws if the image is encoded with an <see cref="IColorIndexEncoding"/>.</remarks>
-        void SetColorInPalette(int paletteIndex, Color color);
+        /// <remarks>Throws if the image is encoded with an <see cref="IIndexEncoding"/>.</remarks>
+        void SetColorInPalette(int paletteIndex, Rgba32 color);
 
         /// <summary>
         /// Sets a palette index at any position in the image.
         /// </summary>
         /// <param name="point">The position to set the index at.</param>
         /// <param name="paletteIndex">The index to set.</param>
-        /// <remarks>Throws if the image is encoded with an <see cref="IColorIndexEncoding"/>.</remarks>
+        /// <remarks>Throws if the image is encoded with an <see cref="IIndexEncoding"/>.</remarks>
         void SetIndexInImage(Point point, int paletteIndex);
     }
 }

@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using Kanvas;
-using Kanvas.Encoding;
 using Komponent.IO.Attributes;
 using Kontract.Kanvas;
-using Kontract.Models.Image;
 using Kontract.Models.IO;
-
-#pragma warning disable 649
+using SixLabors.ImageSharp;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_nintendo.Images
 {

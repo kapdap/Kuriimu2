@@ -1,5 +1,5 @@
-﻿using System.Drawing;
-using Kontract.Kanvas.Configuration;
+﻿using Kontract.Kanvas.Configuration;
+using SixLabors.ImageSharp;
 
 namespace Kontract.Kanvas.Model
 {

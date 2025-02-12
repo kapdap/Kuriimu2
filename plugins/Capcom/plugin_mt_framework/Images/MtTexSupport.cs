@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using Kanvas;
 using Kanvas.Encoding;
@@ -11,6 +10,7 @@ using Kontract.Kanvas;
 using Kontract.Models.Dialog;
 using Kontract.Models.Image;
 using Kontract.Models.IO;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace plugin_mt_framework.Images
 {
@@ -222,7 +222,7 @@ namespace plugin_mt_framework.Images
 
         private static readonly IDictionary<int, IColorShader> ShadersPs3 = new Dictionary<int, IColorShader>
         {
-            [0x21] = new MtTex_NoAlphaShader(),
+            [0x21] = new MtTex_NormalBlendBlackShader(),
             [0x2A] = new MtTex_YCbCrColorShader()
         };
 
@@ -349,35 +349,37 @@ namespace plugin_mt_framework.Images
         // https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion
         private const int CbCrThreshold_ = 123; // usually 128, but 123 seems to work better here
 
-        public Color Read(Color c)
+        public Rgba32 Read(Rgba32 c)
         {
             var (a, y, cb, cr) = (c.G, c.A, c.B - CbCrThreshold_, c.R - CbCrThreshold_);
-            return Color.FromArgb(a,
-                Clamp(y + 1.402 * cr),
-                Clamp(y - 0.344136 * cb - 0.714136 * cr),
-                Clamp(y + 1.772 * cb));
+            return new Rgba32(
+                (byte)Math.Clamp(y + 1.402 * cr, 0, 255),
+                (byte)Math.Clamp(y - 0.344136 * cb - 0.714136 * cr, 0, 255),
+                (byte)Math.Clamp(y + 1.772 * cb, 0, 255),
+                a);
         }
 
-        public Color Write(Color c)
+        public Rgba32 Write(Rgba32 c)
         {
             var (a, y, cb, cr) = (c.A,
                 0.299 * c.R + 0.587 * c.G + 0.114 * c.B,
                 CbCrThreshold_ - 0.168736 * c.R - 0.331264 * c.G + 0.5 * c.B,
                 CbCrThreshold_ + 0.5 * c.R - 0.418688 * c.G - 0.081312 * c.B);
-            return Color.FromArgb(Clamp(y), Clamp(cr), a, Clamp(cb));
+            return new Rgba32((byte)Math.Clamp(cr, 0, 255), a, (byte)Math.Clamp(cb, 0, 255), (byte)Math.Clamp(y, 0, 255));
         }
-
-        private int Clamp(double n) => (int)Math.Max(0, Math.Min(n, 255));
     }
 
-    class MtTex_NoAlphaShader : IColorShader
+    class MtTex_NormalBlendBlackShader : IColorShader
     {
-        public Color Read(Color c)
+        public Rgba32 Read(Rgba32 c)
         {
-            return Color.FromArgb(255, c.R, c.G, c.B);
+            float alphaRatio = c.A / 255f;
+            int BlendNormal(int top) => (int)(alphaRatio * top);
+
+            return new Rgba32(BlendNormal(c.R), BlendNormal(c.G), BlendNormal(c.B), 255);
         }
 
-        public Color Write(Color c)
+        public Rgba32 Write(Rgba32 c)
         {
             return c;
         }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
+using SixLabors.ImageSharp;
 
 namespace Kanvas.Swizzle
 {

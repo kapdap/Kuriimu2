@@ -1,52 +1,27 @@
-﻿using System;
-using System.Drawing;
+﻿using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp;
 
 namespace Komponent.Extensions
 {
-    public static class BitmapExtensions
+    public static class ImageExtensions
     {
-        public static void PutChannel(this Bitmap bitmap, Bitmap channel)
+        public static void PutChannel(this Image<Rgba32> bitmap, Image<Rgba32> channel)
         {
-            var bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, bitmap.PixelFormat);
-            var chnData = channel.LockBits(new Rectangle(0, 0, channel.Width, channel.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, channel.PixelFormat);
-
-            IntPtr ptrBmp = bmpData.Scan0;
-            IntPtr ptrChn = chnData.Scan0;
-
-            int bytesOfBmp = Math.Abs(bmpData.Stride) * bitmap.Height;
-            int bytesOfChn = Math.Abs(chnData.Stride) * channel.Height;
-            
-            unsafe
+            for (var y = 0; y < channel.Height && y < bitmap.Height; y++)
             {
-                Span<byte> bmpPixels = new Span<byte>(ptrBmp.ToPointer(), bytesOfBmp);
-                Span<byte> chnPixels = new Span<byte>(ptrChn.ToPointer(), bytesOfChn);
-
-                for (int y = 0; y < channel.Height && y < bitmap.Height; y++)
+                for (var x = 0; x < channel.Width && x < bitmap.Width; x++)
                 {
-                    for (int x = 0; x < channel.Width && x < bitmap.Width; x++)
-                    {
-                        int bmpPixelIndex = ((y * bitmap.Width) + x) * 4;
-                        byte bA = bmpPixels[bmpPixelIndex + 0];
-                        byte bR = bmpPixels[bmpPixelIndex + 1];
-                        byte bG = bmpPixels[bmpPixelIndex + 2];
-                        byte bB = bmpPixels[bmpPixelIndex + 3];
+                    Rgba32 color = bitmap[x, y];
+                    Rgba32 channelColor = channel[x, y];
 
-                        int chnPixelIndex = ((y * channel.Width) + x) * 4;
-                        byte cA = chnPixels[chnPixelIndex + 0];
-                        byte cR = chnPixels[chnPixelIndex + 1];
-                        byte cG = chnPixels[chnPixelIndex + 2];
-                        byte cB = chnPixels[chnPixelIndex + 3];
+                    var red = (byte)(color.R | channelColor.R);
+                    var green = (byte)(color.G | channelColor.G);
+                    var blue = (byte)(color.B | channelColor.B);
+                    var alpha = (byte)(color.A | channelColor.A);
 
-                        bmpPixels[bmpPixelIndex + 0] = (byte)(bA | cA);
-                        bmpPixels[bmpPixelIndex + 1] = (byte)(bR | cR);
-                        bmpPixels[bmpPixelIndex + 2] = (byte)(bG | cG);
-                        bmpPixels[bmpPixelIndex + 3] = (byte)(bB | cB);
-                    }
+                    bitmap[x, y] = new Rgba32(red, green, blue, alpha);
                 }
             }
-            
-            bitmap.UnlockBits(bmpData);
-            channel.UnlockBits(chnData);
         }
     }
 }

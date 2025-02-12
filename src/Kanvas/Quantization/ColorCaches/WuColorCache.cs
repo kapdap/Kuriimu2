@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using Kanvas.Quantization.Models.Quantizer.Wu;
-using Kontract.Kanvas.Model;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Quantization.ColorCaches
 {
@@ -13,7 +12,7 @@ namespace Kanvas.Quantization.ColorCaches
 
         internal byte[] Tag { get; set; }
 
-        public IList<Color> Palette { get; private set; }
+        public IList<Rgba32> Palette { get; private set; }
 
         public WuColorCache(int indexBits, int indexAlphaBits)
         {
@@ -21,7 +20,7 @@ namespace Kanvas.Quantization.ColorCaches
             _indexAlphaBits = indexAlphaBits;
         }
 
-        public int GetPaletteIndex(Color color)
+        public int GetPaletteIndex(Rgba32 color)
         {
             int a = color.A >> (8 - _indexAlphaBits);
             int r = color.R >> (8 - _indexBits);
@@ -33,7 +32,7 @@ namespace Kanvas.Quantization.ColorCaches
             return Tag[index];
         }
 
-        internal void SetPalette(IList<Color> palette)
+        internal void SetPalette(IList<Rgba32> palette)
         {
             Palette = palette;
         }

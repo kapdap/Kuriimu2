@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using Kanvas.MoreEnumerable;
 using Kanvas.Quantization.Models.Ditherer;
 using Kontract.Kanvas.Quantization;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Quantization.Ditherers.ErrorDiffusion
 {
@@ -42,7 +42,7 @@ namespace Kanvas.Quantization.Ditherers.ErrorDiffusion
                     _errorFactorMatrix[i, j] = Matrix[i, j] / (float)ErrorLimit;
         }
 
-        public IEnumerable<int> Process(IEnumerable<Color> colors, IColorCache colorCache)
+        public IEnumerable<int> Process(IEnumerable<Rgba32> colors, IColorCache colorCache)
         {
             _colorCache = colorCache;
 
@@ -56,7 +56,7 @@ namespace Kanvas.Quantization.Ditherers.ErrorDiffusion
             return indices;
         }
 
-        private IEnumerable<ErrorDiffusionLineTask> CreateDelayedTasks(IEnumerable<Color> colors, IDictionary<int, ColorComponentError> errors, IList<int> indices)
+        private IEnumerable<ErrorDiffusionLineTask> CreateDelayedTasks(IEnumerable<Rgba32> colors, IDictionary<int, ColorComponentError> errors, IList<int> indices)
         {
             var startIndex = 0;
 
@@ -86,11 +86,11 @@ namespace Kanvas.Quantization.Ditherers.ErrorDiffusion
             var error = element.Errors[index];
 
             // Add Error component Values to source color
-            var errorDiffusedColor = Color.FromArgb(
+            var errorDiffusedColor = new Rgba32(
                 sourceColor.A,
-                Clamp(sourceColor.R + error.RedError, 0, 255),
-                Clamp(sourceColor.G + error.GreenError, 0, 255),
-                Clamp(sourceColor.B + error.BlueError, 0, 255));
+                (byte)Clamp(sourceColor.R + error.RedError, 0, 255),
+                (byte)Clamp(sourceColor.G + error.GreenError, 0, 255),
+                (byte)Clamp(sourceColor.B + error.BlueError, 0, 255));
 
             // Quantize Error diffused source color
             element.Indices[index] = _colorCache.GetPaletteIndex(errorDiffusedColor);

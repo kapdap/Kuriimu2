@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using Kanvas.Swizzle;
 using Komponent.IO;
-using Kontract.Models.Image;
+using SixLabors.ImageSharp;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_sony.Images
 {

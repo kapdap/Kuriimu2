@@ -6,6 +6,7 @@ using Kanvas.Encoding;
 using Komponent.IO.Attributes;
 using Kontract.Kanvas;
 using Kontract.Models.Image;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace plugin_sega.Images
 {
@@ -46,14 +47,14 @@ namespace plugin_sega.Images
 
     class HtexColorShader : IColorShader
     {
-        public Color Read(Color c)
+        public Rgba32 Read(Rgba32 c)
         {
-            return Color.FromArgb(c.A * 0xFF / 0x80, c.R, c.G, c.B);
+            return new Rgba32(c.R, c.G, c.B, c.A * 0xFF / 0x80);
         }
 
-        public Color Write(Color c)
+        public Rgba32 Write(Rgba32 c)
         {
-            return Color.FromArgb(c.A * 0x80 / 0xFF, c.R, c.G, c.B);
+            return new Rgba32(c.R, c.G, c.B, c.A * 0x80 / 0xFF);
         }
     }
 }

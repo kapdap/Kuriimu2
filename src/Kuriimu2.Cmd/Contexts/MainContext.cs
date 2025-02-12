@@ -14,7 +14,7 @@ namespace Kuriimu2.Cmd.Contexts
 {
     class MainContext : BaseFileContext
     {
-        public MainContext(IInternalFileManager pluginManager, IProgressContext progressContext) :
+        public MainContext(IFileManager pluginManager, IProgressContext progressContext) :
             base(pluginManager, progressContext)
         {
         }

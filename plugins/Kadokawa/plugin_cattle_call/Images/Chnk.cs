@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using Kanvas;
@@ -10,8 +9,10 @@ using Kanvas.Swizzle;
 using Komponent.IO;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
-using Kontract.Models.Image;
 using plugin_cattle_call.Compression;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using ImageInfo = Kontract.Models.Image.ImageInfo;
 
 namespace plugin_cattle_call.Images
 {
@@ -91,8 +92,8 @@ namespace plugin_cattle_call.Images
             {
                 // Expand TX4I data to RGBA8888
                 foreach (var dataChunk in dataChunks)
-                    result.Add(new BitmapKanvasImage(ExpandTX4I(dataChunk.data, tx4iChunk.data, paletteChunk.data)
-                        .ToBitmap(new Size(texInfo.width, texInfo.height), new Size(paddedWidth, texInfo.height),
+                    result.Add(new SharpKanvasImage(ExpandTX4I(dataChunk.data, tx4iChunk.data, paletteChunk.data)
+                        .ToImage(new Size(texInfo.width, texInfo.height), new Size(paddedWidth, texInfo.height),
                             new BcSwizzle(new SwizzlePreparationContext(new Rgba(8, 8, 8, 8), new Size(paddedWidth, texInfo.height))), ImageAnchor.TopLeft)));
             }
 
@@ -127,12 +128,12 @@ namespace plugin_cattle_call.Images
             return chunks;
         }
 
-        private IList<Color> ExpandTX4I(byte[] data, byte[] tx4iData, byte[] paletteData)
+        private IList<Rgba32> ExpandTX4I(byte[] data, byte[] tx4iData, byte[] paletteData)
         {
             var palEnc = new Rgba(5, 5, 5, "BGR");
-            Color DecodeColor(byte[] cData) => palEnc.Load(cData, new EncodingLoadContext(new Size(1, 1), 1)).First();
+            Rgba32 DecodeColor(byte[] cData) => palEnc.Load(cData, new EncodingLoadContext(new Size(1, 1), 1)).First();
 
-            var result = new List<Color>();
+            var result = new List<Rgba32>();
             var clrBuffer = new byte[2];
 
             for (var i = 0; i < data.Length; i += 4)

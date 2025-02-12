@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Kanvas.Quantization.Models;
 using Kanvas.Quantization.Models.ColorCache;
-using Kontract.Kanvas.Model;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Quantization.ColorCaches
 {
@@ -44,7 +43,7 @@ namespace Kanvas.Quantization.ColorCaches
             }
         }
 
-        public LocalitySensitiveHashColorCache(IList<Color> palette, ColorModel colorModel) :
+        public LocalitySensitiveHashColorCache(IList<Rgba32> palette, ColorModel colorModel) :
             base(palette)
         {
             CreateBuckets(palette);
@@ -54,7 +53,7 @@ namespace Kanvas.Quantization.ColorCaches
         }
 
         /// <inheritdoc />
-        public override int GetPaletteIndex(Color color)
+        public override int GetPaletteIndex(Rgba32 color)
         {
             var bucket = GetBucket(color);
 
@@ -67,7 +66,7 @@ namespace Kanvas.Quantization.ColorCaches
             return bucket.Colors.ElementAt(bucketIndex).Key;
         }
 
-        private void CreateBuckets(IList<Color> palette)
+        private void CreateBuckets(IList<Rgba32> palette)
         {
             _buckets = new LshBucketInfo[_quality];
 
@@ -88,7 +87,7 @@ namespace Kanvas.Quantization.ColorCaches
         }
 
 
-        private LshBucketInfo GetBucket(Color color)
+        private LshBucketInfo GetBucket(Rgba32 color)
         {
             long bucketIndex = GetColorBucketIndex(color);
 
@@ -122,7 +121,7 @@ namespace Kanvas.Quantization.ColorCaches
         }
 
 
-        private long GetColorBucketIndex(Color color)
+        private long GetColorBucketIndex(Rgba32 color)
         {
             var normalizedDistance = GetNormalizedDistance();
             var distance = EuclideanHelper.GetEuclideanDistance(color);

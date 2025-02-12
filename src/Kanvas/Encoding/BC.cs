@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using BCnEncoder.Decoder;
 using BCnEncoder.Encoder;
@@ -8,7 +7,8 @@ using BCnEncoder.Shared;
 using Kanvas.MoreEnumerable;
 using Kontract.Kanvas;
 using Kontract.Kanvas.Model;
-using Microsoft.Toolkit.HighPerformance.Extensions;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Kanvas.Encoding
 {
@@ -41,7 +41,7 @@ namespace Kanvas.Encoding
         }
 
         /// <inheritdoc cref="Load"/>
-        public IEnumerable<Color> Load(byte[] input, EncodingLoadContext loadContext)
+        public IEnumerable<Rgba32> Load(byte[] input, EncodingLoadContext loadContext)
         {
             var blockSize = BitsPerValue / 8;
 
@@ -58,17 +58,17 @@ namespace Kanvas.Encoding
                     // Filter out null blocks with error color for BC7 and BC6H
                     if (_format == BcFormat.Bc7 || _format == BcFormat.Bc6H)
                         if (input.Skip(x * blockSize).Take(blockSize).All(b => b == 0))
-                            return Enumerable.Repeat(Color.Magenta, blockSize);
+                            return Enumerable.Repeat((Rgba32)Color.Magenta, blockSize);
 
                     var decodedBlock = decoder.DecodeBlock(span, compressionFormat);
 
                     decodedBlock.TryGetMemory(out var memory);
-                    return memory.ToArray().Select(y => Color.FromArgb(y.a, y.r, y.g, y.b));
+                    return memory.ToArray().Select(y => new Rgba32(y.r, y.g, y.b, y.a));
                 });
         }
 
         /// <inheritdoc cref="Save"/>
-        public byte[] Save(IEnumerable<Color> colors, EncodingSaveContext saveContext)
+        public byte[] Save(IEnumerable<Rgba32> colors, EncodingSaveContext saveContext)
         {
             var compressionFormat = GetCompressionFormat();
             var encoder = GetEncoder(compressionFormat);

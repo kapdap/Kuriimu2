@@ -11,7 +11,7 @@ using plugin_criware.Archives.Support;
 
 namespace plugin_criware.Archives
 {
-    class Cpk
+    public class Cpk
     {
         private CpkTable _header;
 
@@ -68,10 +68,10 @@ namespace plugin_criware.Archives
             long tableOffset = headerTableSize;
 
             var fileOffset = tableOffset +
-                CpkSupport.Align(_tocTable?.CalculateSize() ?? 0, _align) +
-                CpkSupport.Align(_etocTable?.CalculateSize() ?? 0, _align) +
-                CpkSupport.Align(_itocTable?.CalculateSize() ?? 0, _align) +
-                CpkSupport.Align(_gtocTable?.CalculateSize() ?? 0, _align);
+                             CpkSupport.Align(_tocTable?.CalculateSize() ?? 0, _align) +
+                             CpkSupport.Align(_etocTable?.CalculateSize() ?? 0, _align) +
+                             CpkSupport.Align(_itocTable?.CalculateSize() ?? 0, _align) +
+                             CpkSupport.Align(_gtocTable?.CalculateSize() ?? 0, _align);
 
             // Write files and toc table
             if (_tocTable != null)
